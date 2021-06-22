@@ -5,9 +5,9 @@ This repo hosts Power BI Template (.pbit) reports that you can point to your Azu
 
 After opening the template you will be prompted to enter your Log Analytics Workspace ID. Once it has this information and you have logged in to Azure, the report can refresh. 
 
-Here are the templates available:
+Here are the available templates:
 
-- Log Analytics for Analysis Services Engine: This report allows you to visualize the activity of datasets hosted in the Analysis Services Engine in Power BI workspaces. You can use it to identify load patterns, investigate user actions, look at query performance trends, visualize refreshes, and much more! 
+- **Log Analytics for Analysis Services Engine:** This report allows you to visualize the activity of datasets hosted in the Analysis Services Engine in Power BI workspaces. You can use it to identify load patterns, investigate user actions, look at query performance trends, visualize refreshes, and much more! 
 
 
 
