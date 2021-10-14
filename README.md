@@ -35,3 +35,4 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 ## Known Issues
 - SE Duration measures are currently blank. This is because Vertipaq Storage Engine events are not yet supported in the Preview.
+- If you find the report takes a very long time to refresh and appears to be stuck, try to load a shorter period of time. We have built the Power Query logic with Log analytics Query limits in mind, but it is possible you are hitting limits. Another thing to try is to go to the Regional Settings -> Locale in the template and change it to US date format. We have had reports of European customers having the report load blocked becuase of date conversion errors.
