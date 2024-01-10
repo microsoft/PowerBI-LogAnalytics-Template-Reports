@@ -12,7 +12,7 @@
       },
       {
         "name": "PBIDesktopVersion",
-        "value": "2.122.442.0 (23.10)"
+        "value": "2.124.1554.0 (23.12)"
       },
       {
         "name": "__TEdtr",
@@ -6736,7 +6736,9 @@
                       "Weight": 0.491
                     }
                   },
-                  {},
+                  {
+                    "": {}
+                  },
                   {
                     "set-up": {
                       "Source": {
@@ -22311,7 +22313,9 @@
                       "Weight": 0.491
                     }
                   },
-                  {},
+                  {
+                    "": {}
+                  },
                   {
                     "set-up": {
                       "Source": {
@@ -22451,7 +22455,9 @@
                       "Weight": 0.491
                     }
                   },
-                  {},
+                  {
+                    "": {}
+                  },
                   {
                     "set-up": {
                       "Source": {
@@ -45921,7 +45927,7 @@
           }
         ],
         "description": "From how many days ago should the report start loading data? (For example: 30,28,21,14,7)",
-        "expression": "30 meta [IsParameterQuery=true, List={30, 28, 21, 14, 7}, DefaultValue=30, Type=\"Number\", IsParameterQueryRequired=true]",
+        "expression": "7 meta [IsParameterQuery=true, List={30, 28, 21, 14, 7}, DefaultValue=7, Type=\"Number\", IsParameterQueryRequired=true]",
         "kind": "m",
         "lineageTag": "2e31fdcb-319b-49aa-a417-067aa158797b",
         "queryGroup": "Params"
@@ -46032,7 +46038,7 @@
           }
         ],
         "description": "The unique identifier of the Azure Log Analytics workspace containing the activity data.",
-        "expression": "\"309df71c-8de4-4982-8902-3891219de160\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]",
+        "expression": "\"f7125a71-5b6c-4580-bb08-9f97940c62ac\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]",
         "kind": "m",
         "lineageTag": "9c7f0ca2-e9f8-48cb-a070-b01b133c1425",
         "queryGroup": "Params"
@@ -46520,62 +46526,62 @@
           }
         ],
         "expression": [
-          "let",
-          "    Source = (#\"Days Ago To Start\" as number, #\"Days Ago To Finish\" as number, #\"Hours\" as number,#\"Pagination Hours\" as number, #\"Log Analytics Table\" as text, #\"UTC Offset Hours\" as number) => let AnalyticsQuery =",
-          "let Source = Json.Document(Web.Contents(\"https://api.loganalytics.io/v1/workspaces/\" & GetWorkspaceId & \"/query\", ",
-          "[Query=[#\"query\"=\"",
-          "set notruncation;",
-          "let workspaceIdList = dynamic(['50EA7149-43DC-4DE3-8E56-4D5DBBC83E8F', 'C839BDCB-81B5-4DC3-9F92-818FE71432A1', '80FA5101-D77B-4AC3-B86A-EEAFE28E64AC']);",
-          "",
-          "let startDate = startofday(ago(\" & Number.ToText(#\"Days Ago To Start\") & \"d))- \"& Number.ToText(#\"UTC Offset Hours\" * 60) & \"m ;",
-          "let endDate = endofday(ago(\" & Number.ToText(#\"Days Ago To Finish\") & \"d));",
-          "let startIngestionTime = datetime_add('hour', \" & Number.ToText(#\"Hours\") & \",todatetime(startDate));",
-          "let endIngestionTime = datetime_add('hour', \" & Number.ToText(#\"Pagination Hours\") & \",todatetime(startIngestionTime));",
-          "",
-          "\"& #\"Log Analytics Table\" &  \" ",
-          "| where TimeGenerated >= startIngestionTime and TimeGenerated < endIngestionTime",
-          "| where (OperationName == 'AggregateTableRewriteQuery') ",
-          "| extend TextDataHash = hash(EventText)",
-          "| extend DurationMs = coalesce(DurationMs, 0)",
-          "| extend User = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(User), User)",
-          "| extend ExecutingUser = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(ExecutingUser), ExecutingUser)",
-          "| distinct ApplicationName, CpuTimeMs, ArtifactId, ArtifactName, ArtifactKind, DatasetMode, DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, _ResourceId, _SubscriptionId",
-          "| project ApplicationName, CpuTimeMs, DatasetId = ArtifactId, Dataset = ArtifactName, ArtifactKind, DatasetMode, ['Duration (ms)'] = DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, ResourceId = _ResourceId, SubscriptionId = _SubscriptionId, StartTime = TimeGenerated",
-          "",
-          "\"],Timeout=#duration(0,0,60,0)])),",
-          "TypeMap = #table(",
-          "{ \"AnalyticsTypes\", \"Type\" }, ",
-          "{ ",
-          "{ \"string\",   Text.Type },",
-          "{ \"int\",      Int32.Type },",
-          "{ \"long\",     Int64.Type },",
-          "{ \"real\",     Double.Type },",
-          "{ \"timespan\", Duration.Type },",
-          "{ \"datetime\", DateTimeZone.Type },",
-          "{ \"bool\",     Logical.Type },",
-          "{ \"guid\",     Text.Type },",
-          "{ \"dynamic\",  Text.Type }",
-          "}),",
-          "DataTable = Source[tables]{0},",
-          "Columns = Table.FromRecords(DataTable[columns]),",
-          "ColumnsWithType = Table.Join(Columns, {\"type\"}, TypeMap , {\"AnalyticsTypes\"}),",
-          "Rows = Table.FromRows(DataTable[rows], Columns[name]), ",
-          "Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))",
-          "in",
-          "Table,",
-          "    #\"Added Start DateTime (UTC offset)\" = Table.AddColumn(#\"AnalyticsQuery\", \"Start DateTime\", each [TimeGenerated] + #duration(0,Number.RoundDown(#\"UTC Offset Hours\"),Number.RoundDown(60 * Number.Mod(#\"UTC Offset Hours\", 1)),0),type datetime),   ",
-          "    #\"Inserted StartDate\" = Table.AddColumn(#\"Added Start DateTime (UTC offset)\", \"Start Date\", each DateTime.Date([Start DateTime]), type date),",
-          "    #\"Start Time (s)\" = Table.AddColumn(#\"Inserted StartDate\", \"Start Time (s)\", each DateTime.Time([Start DateTime]), type time),",
-          "    // #\"Inserted StartDate\" = Table.AddColumn(#\"Added Start DateTime (UTC offset)\", \"Start Date\", each Text.BeforeDelimiter(Text.From([Start DateTime], \"en-us\"), \" \") as text),",
-          "    //#\"Start Time (s)\" = Table.AddColumn(#\"Inserted StartDate\", \"Start Time (s)\", each Text.BetweenDelimiters(Text.From([Start DateTime], \"en-US\"), \" \", \" \", 0, 1), type time),",
-          "        ",
-          "    //#\"Renamed Columns\" = Table.RenameColumns(#\"Start Time (s)\",{{\"DurationMs\", \"Duration (ms)\"}}),",
-          "    #\"Added End Date/Time\" = Table.AddColumn(#\"Start Time (s)\", \"EndTime\", each [Start DateTime] + #duration(0, 0, 0, [#\"Duration (ms)\"] / 1000)),",
-          "    #\"Changed Type\" = Table.TransformColumnTypes(#\"Added End Date/Time\",{{\"Start Date\", type date}, {\"Start DateTime\", type datetimezone}, {\"EndTime\", type datetimezone}}),",
-          "    #\"Removed StartTime, TimeGenerated\" = Table.RemoveColumns(#\"Changed Type\",{\"TimeGenerated\", \"StartTime\"})",
-          "in",
-          "    #\"Removed StartTime, TimeGenerated\"",
-          "in",
+          "let\r",
+          "    Source = (#\"Days Ago To Start\" as number, #\"Days Ago To Finish\" as number, #\"Hours\" as number,#\"Pagination Hours\" as number, #\"Log Analytics Table\" as text, #\"UTC Offset Hours\" as number) => let AnalyticsQuery =\r",
+          "let Source = Json.Document(Web.Contents(\"https://api.loganalytics.io/v1/workspaces/\" & GetWorkspaceId & \"/query\", \r",
+          "[Query=[#\"query\"=\"\r",
+          "set notruncation;\r",
+          "let workspaceIdList = dynamic(['50EA7149-43DC-4DE3-8E56-4D5DBBC83E8F', 'C839BDCB-81B5-4DC3-9F92-818FE71432A1', '80FA5101-D77B-4AC3-B86A-EEAFE28E64AC']);\r",
+          "\r",
+          "let startDate = startofday(ago(\" & Number.ToText(#\"Days Ago To Start\") & \"d))- \"& Number.ToText(#\"UTC Offset Hours\" * 60) & \"m ;\r",
+          "let endDate = endofday(ago(\" & Number.ToText(#\"Days Ago To Finish\") & \"d));\r",
+          "let startIngestionTime = datetime_add('hour', \" & Number.ToText(#\"Hours\") & \",todatetime(startDate));\r",
+          "let endIngestionTime = datetime_add('hour', \" & Number.ToText(#\"Pagination Hours\") & \",todatetime(startIngestionTime));\r",
+          "\r",
+          "\"& #\"Log Analytics Table\" &  \" \r",
+          "| where TimeGenerated >= startIngestionTime and TimeGenerated < endIngestionTime\r",
+          "| where (OperationName == 'AggregateTableRewriteQuery') \r",
+          "| extend TextDataHash = hash(EventText)\r",
+          "| extend DurationMs = coalesce(DurationMs, 0)\r",
+          "| extend User = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(User), User)\r",
+          "| extend ExecutingUser = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(ExecutingUser), ExecutingUser)\r",
+          "| distinct ApplicationName, CpuTimeMs, ArtifactId, ArtifactName, ArtifactKind, DatasetMode, DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, _ResourceId, _SubscriptionId\r",
+          "| project ApplicationName, CpuTimeMs, DatasetId = ArtifactId, Dataset = ArtifactName, ArtifactKind, DatasetMode, ['Duration (ms)'] = DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, ResourceId = _ResourceId, SubscriptionId = _SubscriptionId, StartTime = TimeGenerated\r",
+          "\r",
+          "\"],Timeout=#duration(0,0,60,0)])),\r",
+          "TypeMap = #table(\r",
+          "{ \"AnalyticsTypes\", \"Type\" }, \r",
+          "{ \r",
+          "{ \"string\",   Text.Type },\r",
+          "{ \"int\",      Int32.Type },\r",
+          "{ \"long\",     Int64.Type },\r",
+          "{ \"real\",     Double.Type },\r",
+          "{ \"timespan\", Duration.Type },\r",
+          "{ \"datetime\", DateTimeZone.Type },\r",
+          "{ \"bool\",     Logical.Type },\r",
+          "{ \"guid\",     Text.Type },\r",
+          "{ \"dynamic\",  Text.Type }\r",
+          "}),\r",
+          "DataTable = Source[tables]{0},\r",
+          "Columns = Table.FromRecords(DataTable[columns]),\r",
+          "ColumnsWithType = Table.Join(Columns, {\"type\"}, TypeMap , {\"AnalyticsTypes\"}),\r",
+          "Rows = Table.FromRows(DataTable[rows], Columns[name]), \r",
+          "Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))\r",
+          "in\r",
+          "Table,\r",
+          "    #\"Added Start DateTime (UTC offset)\" = Table.AddColumn(#\"AnalyticsQuery\", \"Start DateTime\", each [TimeGenerated] + #duration(0,Number.RoundDown(#\"UTC Offset Hours\"),Number.RoundDown(60 * Number.Mod(#\"UTC Offset Hours\", 1)),0),type datetime),   \r",
+          "    #\"Inserted StartDate\" = Table.AddColumn(#\"Added Start DateTime (UTC offset)\", \"Start Date\", each DateTime.Date([Start DateTime]), type date),\r",
+          "    #\"Start Time (s)\" = Table.AddColumn(#\"Inserted StartDate\", \"Start Time (s)\", each DateTime.Time([Start DateTime]), type time),\r",
+          "    // #\"Inserted StartDate\" = Table.AddColumn(#\"Added Start DateTime (UTC offset)\", \"Start Date\", each Text.BeforeDelimiter(Text.From([Start DateTime], \"en-us\"), \" \") as text),\r",
+          "    //#\"Start Time (s)\" = Table.AddColumn(#\"Inserted StartDate\", \"Start Time (s)\", each Text.BetweenDelimiters(Text.From([Start DateTime], \"en-US\"), \" \", \" \", 0, 1), type time),\r",
+          "        \r",
+          "    //#\"Renamed Columns\" = Table.RenameColumns(#\"Start Time (s)\",{{\"DurationMs\", \"Duration (ms)\"}}),\r",
+          "    #\"Added End Date/Time\" = Table.AddColumn(#\"Start Time (s)\", \"EndTime\", each [Start DateTime] + #duration(0, 0, 0, [#\"Duration (ms)\"] / 1000)),\r",
+          "    #\"Changed Type\" = Table.TransformColumnTypes(#\"Added End Date/Time\",{{\"Start Date\", type date}, {\"Start DateTime\", type datetimezone}, {\"EndTime\", type datetimezone}}),\r",
+          "    #\"Removed StartTime, TimeGenerated\" = Table.RemoveColumns(#\"Changed Type\",{\"TimeGenerated\", \"StartTime\"})\r",
+          "in\r",
+          "    #\"Removed StartTime, TimeGenerated\"\r",
+          "in\r",
           "    Source"
         ],
         "kind": "m",
@@ -46588,10 +46594,14 @@
           {
             "name": "PBI_ResultType",
             "value": "Number"
+          },
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
           }
         ],
         "description": "Your offset in hours from UTC time. You can enter part hours, for example 5.5 for India.",
-        "expression": "1 meta [IsParameterQuery=true, Type=\"Number\", IsParameterQueryRequired=true]",
+        "expression": "0 meta [IsParameterQuery=true, Type=\"Number\", IsParameterQueryRequired=true]",
         "kind": "m",
         "lineageTag": "21d78875-0c22-44ca-b13a-730dcda605ac",
         "queryGroup": "Params"
@@ -47097,10 +47107,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "excludeFromModelRefresh": true,
@@ -47380,15 +47386,23 @@
             "displayFolder": "CPU Time - Operation",
             "expression": [
               "",
+              "// RR - Fix, the operation CPU time (e.g. CommandEnd) already includes the CPU of suboperation events like ProgressReportEnd",
               "VAR OperationCPUTime =",
               "    CALCULATE (",
               "        SUM ( 'Operation'[CPUTime (ms)] ),",
               "        Scenario[ID] = 1",
               "    )",
-              "VAR SuboperationCPUTime =",
-              "    SUM ( 'Suboperation - Refresh'[CpuTimeMs] )",
               "RETURN",
-              "    OperationCPUTime + SuboperationCPUTime"
+              "    OperationCPUTime ",
+              "// VAR OperationCPUTime =",
+              "//     CALCULATE (",
+              "//         SUM ( 'Operation'[CPUTime (ms)] ),",
+              "//         Scenario[ID] = 1",
+              "//     )",
+              "// VAR SuboperationCPUTime =",
+              "//     SUM ( 'Suboperation - Refresh'[CpuTimeMs] )",
+              "// RETURN",
+              "//     OperationCPUTime + SuboperationCPUTime"
             ],
             "formatString": "#,0",
             "lineageTag": "5cf7b60c-ef5e-4532-be08-94b464ea4057"
@@ -49402,10 +49416,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "columns": [
@@ -49877,7 +49887,7 @@
         "annotations": [
           {
             "name": "PBI_ResultType",
-            "value": "Table"
+            "value": "Exception"
           },
           {
             "name": "PBI_NavigationStepName",
@@ -50706,11 +50716,7 @@
         "annotations": [
           {
             "name": "PBI_ResultType",
-            "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
+            "value": "Exception"
           }
         ],
         "columns": [
@@ -50966,7 +50972,7 @@
               }
             ],
             "dataType": "int64",
-            "formatString": "0",
+            "formatString": "#,0",
             "lineageTag": "31d9be39-f0e8-4ebe-8665-cb86a5438c37",
             "sourceColumn": "CpuTimeMs",
             "summarizeBy": "sum"
@@ -51278,10 +51284,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "columns": [
@@ -51351,10 +51353,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "columns": [
@@ -51450,10 +51448,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "columns": [
@@ -51536,11 +51530,7 @@
         "annotations": [
           {
             "name": "PBI_ResultType",
-            "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
+            "value": "Exception"
           }
         ],
         "columns": [
@@ -52017,10 +52007,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "columns": [
@@ -52255,10 +52241,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "columns": [
@@ -53104,10 +53086,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "columns": [
@@ -53314,7 +53292,7 @@
               "",
               "VAR Selection = [Selected page]",
               "VAR Filtered =",
-              "    ISFILTERED ( User[User] )",
+              "    ISFILTERED ( User[Executing User] )",
               "VAR Result =",
               "    IF (",
               "        Filtered",
@@ -53432,10 +53410,6 @@
           {
             "name": "PBI_ResultType",
             "value": "Table"
-          },
-          {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
           }
         ],
         "columns": [
