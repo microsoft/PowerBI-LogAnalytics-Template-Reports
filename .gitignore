@@ -351,3 +351,5 @@ MigrationBackup/
 
 **/.pbi/localSettings.json
 **/.pbi/cache.abf
+
+_internal/**

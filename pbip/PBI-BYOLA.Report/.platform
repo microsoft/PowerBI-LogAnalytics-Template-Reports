@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "PBI-BYOLA"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "26f527b7-d642-41a4-996a-1e7ffa80db31"
+  }
+}

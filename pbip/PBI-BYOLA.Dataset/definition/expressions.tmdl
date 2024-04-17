@@ -1,0 +1,550 @@
+/// From how many days ago should the report start loading data? (For example: 30,28,21,14,7)
+expression 'Days Ago To Start' = 7 meta [IsParameterQuery=true, List={30, 28, 21, 14, 7}, DefaultValue=7, Type="Number", IsParameterQueryRequired=true]
+	lineageTag: 2e31fdcb-319b-49aa-a417-067aa158797b
+	queryGroup: Params
+
+	annotation PBI_ResultType = Number
+
+	annotation PBI_NavigationStepName = Navigation
+
+/// Until how many days ago should the report stop loading data? (For example: 0,7,14,21 use 0 for today)
+expression 'Days Ago To Finish' = 0 meta [IsParameterQuery=true, List={21, 14, 7, 0}, DefaultValue=0, Type="Number", IsParameterQueryRequired=true]
+	lineageTag: 2377307e-2c45-4dd5-aa6f-22857558ac12
+	queryGroup: Params
+
+	annotation PBI_ResultType = Number
+
+expression fnGetQuerySuboperations = ```
+		let
+		    Source = (#"Days Ago To Start" as number, #"Days Ago To Finish" as number, #"Hours" as number,#"Pagination Hours" as number, #"Log Analytics Table" as text, #"UTC Offset Hours" as number) => let AnalyticsQuery =
+		let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/" & GetWorkspaceId & "/query", 
+		[Query=[#"query"="
+		set notruncation;
+		
+		
+		let startDate = startofday(ago(" & Number.ToText(#"Days Ago To Start") & "d))- "& Number.ToText(#"UTC Offset Hours" * 60) & "m ;
+		let startIngestionTime = datetime_add('hour', " & Number.ToText(#"Hours") & ",todatetime(startDate));
+		let endIngestionTime = datetime_add('hour', " & Number.ToText(#"Pagination Hours") & ",todatetime(startIngestionTime));
+		
+		"& #"Log Analytics Table" & " 
+		| where TimeGenerated >= startIngestionTime and TimeGenerated < endIngestionTime
+		| where (OperationName == 'VertiPaqSEQueryEnd' and OperationDetailName == 'VertiPaqScan') // Queries with EventSubclass = 0
+		      or OperationName == 'DirectQueryEnd' // Queries
+		      or OperationName == 'VertiPaqSEQueryCacheMatch' // Cache hits
+		| extend TextDataHash = hash(EventText)
+		| extend DurationMs = coalesce(DurationMs, 0)
+		| distinct ApplicationName, CpuTimeMs, ArtifactId, ArtifactName, ArtifactKind, DatasetMode, DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, _ResourceId, _SubscriptionId
+		| project ApplicationName, CpuTimeMs, DatasetId = ArtifactId, Dataset = ArtifactName, ArtifactKind, DatasetMode, ['Duration (ms)'] = DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, ResourceId = _ResourceId, SubscriptionId = _SubscriptionId, StartTime = TimeGenerated
+		
+		"],Timeout=#duration(0,0,60,0)])),
+		TypeMap = #table(
+		{ "AnalyticsTypes", "Type" }, 
+		{ 
+		{ "string",   Text.Type },
+		{ "int",      Int32.Type },
+		{ "long",     Int64.Type },
+		{ "real",     Double.Type },
+		{ "timespan", Duration.Type },
+		{ "datetime", DateTimeZone.Type },
+		{ "bool",     Logical.Type },
+		{ "guid",     Text.Type },
+		{ "dynamic",  Text.Type }
+		}),
+		DataTable = Source[tables]{0},
+		Columns = Table.FromRecords(DataTable[columns]),
+		ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+		Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+		Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+		in
+		Table
+		
+		in
+		    AnalyticsQuery
+		in
+		    Source
+		```
+	lineageTag: e92cda24-52ca-48e7-beb3-f13e4813716a
+	queryGroup: 'Kusto queries'
+
+	annotation PBI_ResultType = Function
+
+	annotation PBI_NavigationStepName = Navigation
+
+/// Which table from Azure Log Analytics should be used? (For example: PowerBIDatasetsWorkspace)
+expression 'Log Analytics Table' = "PowerBIDatasetsWorkspace" meta [IsParameterQuery=true, List={"PowerBIDatasetsWorkspace"}, DefaultValue="PowerBIDatasetsWorkspace", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: f09d3b22-11a7-47f8-9530-1d18c2531a8f
+	queryGroup: Params
+
+	annotation PBI_ResultType = Text
+
+/// The unique identifier of the Azure Log Analytics workspace containing the activity data.
+expression 'Log Analytics WorkspaceId' = "f7125a71-5b6c-4580-bb08-9f97940c62ac" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 9c7f0ca2-e9f8-48cb-a070-b01b133c1425
+	queryGroup: Params
+
+	annotation PBI_ResultType = Text
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression UTCOffsetTable =
+		let
+		    Source = Table.FromList
+		    (
+		        {
+		            [Column1="UTC Offset", Offset = #"UTC Offset Hours"]
+		        },
+		        Record.FieldValues,
+		        {
+		            "Description",
+		            "Offset"
+		        }
+		    ),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Offset", type number}})
+		in
+		    #"Changed Type"
+	lineageTag: e54f4725-d3b9-4e11-80ee-073f816de5be
+	queryGroup: 'Helper queries'
+
+	annotation PBI_ResultType = Table
+
+expression RefreshOperations = ```
+		let
+		    StartValue = (#"Days Ago To Start") - 1,
+		    Source = List.Generate(() => StartValue, each _ > #"Days Ago To Finish"-1, each _ - 1),
+		    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+		    #"Added Custom3" = Table.AddColumn(#"Converted to Table", "Hours", each List.Generate(() => 24-(#"Pagination Hours"), each _> -1, each _ -#"Pagination Hours")),
+		    #"Expanded Custom" = Table.ExpandListColumn(#"Added Custom3", "Hours"),
+		    #"Renamed Columns" = Table.RenameColumns(#"Expanded Custom",{{"Column1", "Ago"}}),
+		    #"Invoked Custom Function" = Table.AddColumn(#"Renamed Columns", "fnGetEvents", each fnGetRefreshOperations([Ago], [Ago],[Hours],#"Pagination Hours", #"Log Analytics Table",  #"UTC Offset Hours")),
+		    #"Removed Columns" = Table.RemoveColumns(#"Invoked Custom Function",{"Ago", "Hours"}),
+		    #"Expanded fnGetEvents" = Table.ExpandTableColumn(#"Removed Columns", "fnGetEvents", {"ApplicationName", "CpuTimeMs", "DatasetId", "ArtifactKind", "Dataset", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "ReportId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Type", "User", "PowerBIWorkspaceId", "PowerBIWorkspaceName", "XmlaRequestId", "XmlaSessionId", "ResourceId", "SubscriptionId", "RefreshSubeventKey", "StartTime"}, {"ApplicationName", "CpuTimeMs", "DatasetId", "ArtifactKind", "Dataset", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "ReportId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Type", "User", "WorkspaceId", "WorkspaceName", "XmlaRequestId", "XmlaSessionId", "ResourceId", "SubscriptionId", "RefreshSubeventKey", "StartTime"}),
+		    #"Removed Blank Rows" = Table.SelectRows(#"Expanded fnGetEvents", each not List.IsEmpty(List.RemoveMatchingItems(Record.FieldValues(_), {"", null})))
+		    
+		in
+		    #"Removed Blank Rows"
+		```
+	lineageTag: 8a6fbd83-e012-483c-81aa-ccd97594b384
+	queryGroup: 'Helper queries'
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression RelatedRefreshOperationsForSubOpTable = ```
+		let
+		    StartValue = (#"Days Ago To Start") - 1,
+		    Source = List.Generate(() => StartValue, each _ > #"Days Ago To Finish"-1, each _ - 1),
+		    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+		    #"Added Custom3" = Table.AddColumn(#"Converted to Table", "Hours", each List.Generate(() => 24-(#"Pagination Hours"), each _> -1, each _ -#"Pagination Hours")),
+		    #"Expanded Custom" = Table.ExpandListColumn(#"Added Custom3", "Hours"),
+		    #"Renamed Columns" = Table.RenameColumns(#"Expanded Custom",{{"Column1", "Ago"}}),
+		    #"Invoked Custom Function" = Table.AddColumn(#"Renamed Columns", "GetLogAnalytics_AS", each fnGetRelatedRefreshOperationsForSubOpTable([Ago], [Ago],[Hours],#"Pagination Hours", #"Log Analytics Table",  #"UTC Offset Hours")),
+		    #"Expanded GetRelatedRefreshOperations" = Table.ExpandTableColumn(#"Invoked Custom Function", "GetLogAnalytics_AS", {"ApplicationName", "CpuTimeMs", "DatasetId", "Dataset", "ArtifactKind", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Type", "User", "PowerBIWorkspaceId", "PowerBIWorkspaceName", "XmlaRequestId", "XmlaObjectPath", "XmlaSessionId", "ResourceId", "SubscriptionId", "StartTime", "TimeGenerated"}, {"ApplicationName", "CpuTimeMs", "DatasetId", "Dataset", "ArtifactKind", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Type", "User", "WorkspaceId", "WorkspaceName", "XmlaRequestId", "XmlaObjectPath", "XmlaSessionId", "ResourceId", "SubscriptionId", "StartTime", "TimeGenerated"}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Expanded GetRelatedRefreshOperations",{"Ago", "Hours"}),
+		    #"Removed Duplicates" = Table.Distinct(#"Removed Columns"),
+		    #"Removed Blank Rows" = Table.SelectRows(#"Removed Duplicates", each not List.IsEmpty(List.RemoveMatchingItems(Record.FieldValues(_), {"", null})))
+		    
+		in
+		    #"Removed Blank Rows"
+		```
+	lineageTag: 024d34fa-9547-41d3-bed2-3237cabfbef2
+	queryGroup: 'Helper queries'
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression fnGetRefreshOperations = ```
+		let
+		    Source = (#"Days Ago To Start" as number, #"Days Ago To Finish" as number, #"Hours" as number,#"Pagination Hours" as number, #"Log Analytics Table" as text, #"UTC Offset Hours" as number) => let AnalyticsQuery =
+		let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/" & GetWorkspaceId & "/query", 
+		[Query=[#"query"="
+		// Refreshes can contain several CommandEnd and DiscoveryEnd events that share the same rootActivityId. This report's data model typically has these in the Operation table, however
+		// to keep these events grouped together we move such events to the Suboperation table.
+		set notruncation;
+		let workspaceIdList = dynamic(['50EA7149-43DC-4DE3-8E56-4D5DBBC83E8F', 'C839BDCB-81B5-4DC3-9F92-818FE71432A1', '80FA5101-D77B-4AC3-B86A-EEAFE28E64AC']);
+		
+		let startDate = startofday(ago(" & Number.ToText(#"Days Ago To Start") & "d))- "& Number.ToText(#"UTC Offset Hours" * 60) & "m ;
+		let startIngestionTime = datetime_add('hour', " & Number.ToText(#"Hours") & ",todatetime(startDate));
+		let endIngestionTime = datetime_add('hour', " & Number.ToText(#"Pagination Hours") & ",todatetime(startIngestionTime));
+		
+		
+		"& #"Log Analytics Table" & "
+		| where TimeGenerated >= startIngestionTime and TimeGenerated < endIngestionTime
+		| where OperationName  == 'CommandEnd'
+		| where OperationDetailName == 'Batch' 
+		| where EventText contains_cs '<Refresh xmlns=' // high-level refresh operation
+		| extend DatasetId = tostring(parse_json(ApplicationContext).DatasetId)
+		| extend Sources = parse_json(ApplicationContext).Sources
+		| mv-expand Sources
+		| extend ReportId = tostring(parse_json(Sources).ReportId)
+		| extend TextDataHash = hash(EventText)
+		| extend DurationMs = coalesce(DurationMs, 0)
+		| extend User = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(User), User)
+		| extend ExecutingUser = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(ExecutingUser), ExecutingUser)
+		| distinct  ApplicationName, CpuTimeMs, ArtifactId, ArtifactKind, ArtifactName, DatasetMode, DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, ReportId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, _ResourceId, _SubscriptionId
+		| extend RefreshSubeventKey = XmlaRequestId 
+		| project-rename DatasetId = ArtifactId, Dataset = ArtifactName, StartTime = TimeGenerated, ResourceId = _ResourceId, SubscriptionId = _SubscriptionId, ['Duration (ms)'] = DurationMs
+		
+		",#"x-ms-app"="OmsAnalyticsPBI",#"prefer"="ai.response-thinning=true"],Timeout=#duration(0,0,60,0)])),
+		TypeMap = #table(
+		{ "AnalyticsTypes", "Type" }, 
+		{ 
+		{ "string",   Text.Type },
+		{ "int",      Int32.Type },
+		{ "long",     Int64.Type },
+		{ "real",     Double.Type },
+		{ "timespan", Duration.Type },
+		{ "datetime", DateTimeZone.Type },
+		{ "bool",     Logical.Type },
+		{ "guid",     Text.Type },
+		{ "dynamic",  Text.Type }
+		}),
+		DataTable = Source[tables]{0},
+		Columns = Table.FromRecords(DataTable[columns]),
+		ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+		Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+		Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+		in
+		Table
+		
+		in
+		    AnalyticsQuery
+		in
+		    Source
+		```
+	lineageTag: 0ed96e55-1b98-4ee8-b8a2-6df4b5f2f163
+	queryGroup: 'Kusto queries'
+
+	annotation PBI_ResultType = Function
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression fnGetOperationsExceptRefreshes = ```
+		let
+		    Source = (#"Days Ago To Start" as number, #"Days Ago To Finish" as number,#"Hours" as number,#"Pagination Hours" as number, #"Log Analytics Table" as text, #"UTC Offset Hours" as number) => let AnalyticsQuery =
+		let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/" & GetWorkspaceId & "/query", 
+		[Query=[#"query"="
+		set notruncation;
+		let workspaceIdList = dynamic(['50EA7149-43DC-4DE3-8E56-4D5DBBC83E8F', 'C839BDCB-81B5-4DC3-9F92-818FE71432A1', '80FA5101-D77B-4AC3-B86A-EEAFE28E64AC']);
+		
+		
+		let startDate = startofday(ago(" & Number.ToText(#"Days Ago To Start") & "d))- "& Number.ToText(#"UTC Offset Hours" * 60) & "m ;
+		let startIngestionTime = datetime_add('hour', " & Number.ToText(#"Hours") & ",todatetime(startDate));
+		let endIngestionTime = datetime_add('hour', " & Number.ToText(#"Pagination Hours") & ",todatetime(startIngestionTime));
+		
+		" & #"Log Analytics Table" & " 
+		    | where TimeGenerated >= startIngestionTime and TimeGenerated < endIngestionTime
+		    | where OperationName  in ('DiscoverEnd', 'QueryEnd', 'Error', 'Deadlock', 'SessionInitialize')
+		    | where not (OperationName  == 'CommandEnd' and OperationDetailName == 'Batch' and EventText contains_cs '<Refresh xmlns=')  // remove refreshes. We add them in Power Query
+		    | extend Sources = parse_json(ApplicationContext).Sources
+		    | mv-expand Sources
+		    | extend ReportId = tostring(parse_json(Sources).ReportId)
+		    | extend TextDataHash = hash(EventText)
+		    | extend DurationMs = coalesce(DurationMs, 0)
+		    | extend User = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(User), User)
+		    | extend ExecutingUser = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(ExecutingUser), ExecutingUser)
+		    | distinct  ApplicationName, CpuTimeMs, ArtifactId, ArtifactName, ArtifactKind, DatasetMode, DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, ReportId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, _ResourceId, _SubscriptionId
+		    | extend QuerySubeventKey = case(
+		        OperationName == 'QueryEnd' and isnotempty(XmlaRequestId), XmlaRequestId,  // add rootActivityId as the key if this is a QueryEnd. This joins to the Suboperation table.
+		        dynamic(null)) // if we are not expecting subevents then make this null. In PowerQuery we will add a dummy index value for null values to keep this column unique for the 1:* relationship
+		    | project-rename DatasetId = ArtifactId, Dataset = ArtifactName, StartTime = TimeGenerated, ResourceId = _ResourceId, SubscriptionId = _SubscriptionId,  ['Duration (ms)'] = DurationMs
+		"],Timeout=#duration(0,0,60,0)])),
+		TypeMap = #table(
+		{ "AnalyticsTypes", "Type" }, 
+		{ 
+		{ "string",   Text.Type },
+		{ "int",      Int32.Type },
+		{ "long",     Int64.Type },
+		{ "real",     Double.Type },
+		{ "timespan", Duration.Type },
+		{ "datetime", DateTimeZone.Type },
+		{ "bool",     Logical.Type },
+		{ "guid",     Text.Type },
+		{ "dynamic",  Text.Type }
+		}),
+		DataTable = Source[tables]{0},
+		Columns = Table.FromRecords(DataTable[columns]),
+		ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+		Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+		Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+		in
+		Table
+		    
+		in
+		    AnalyticsQuery
+		in
+		    Source
+		```
+	lineageTag: 30cb2ffe-308f-46ce-91f2-27f29f333f6c
+	queryGroup: 'Kusto queries'
+
+	annotation PBI_ResultType = Function
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression OperationExceptRefresh_stage = ```
+		let
+		    StartValue = (#"Days Ago To Start") - 1,
+		    Source = List.Generate(() => StartValue, each _ > #"Days Ago To Finish"-1, each _ - 1),
+		    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+		    #"Added Custom3" = Table.AddColumn(#"Converted to Table", "Hours", each List.Generate(() => 24-(#"Pagination Hours"), each _> -1, each _ -#"Pagination Hours")),
+		    #"Expanded Custom" = Table.ExpandListColumn(#"Added Custom3", "Hours"),
+		    #"Renamed Columns" = Table.RenameColumns(#"Expanded Custom",{{"Column1", "Ago"}}),
+		    #"Invoked Custom Function" = Table.AddColumn(#"Renamed Columns", "fnGetEvents", each fnGetOperationsExceptRefreshes([Ago], [Ago],[Hours],#"Pagination Hours", #"Log Analytics Table",  #"UTC Offset Hours")),
+		    #"Removed Columns" = Table.RemoveColumns(#"Invoked Custom Function",{"Ago", "Hours"}),
+		    #"Expanded fnGetEvents" = Table.ExpandTableColumn(#"Removed Columns", "fnGetEvents", {"ApplicationName", "CpuTimeMs", "DatasetId", "Dataset", "ArtifactKind", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "ReportId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Type", "User", "PowerBIWorkspaceId", "PowerBIWorkspaceName", "XmlaRequestId", "XmlaSessionId", "ResourceId", "SubscriptionId", "QuerySubeventKey", "StartTime"}, {"ApplicationName", "CpuTimeMs", "DatasetId", "Dataset", "ArtifactKind", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "ReportId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Type", "User", "WorkspaceId", "WorkspaceName", "XmlaRequestId", "XmlaSessionId", "ResourceId", "SubscriptionId", "QuerySubeventKey", "StartTime"}),
+		    #"Removed Blank Rows" = Table.SelectRows(#"Expanded fnGetEvents", each not List.IsEmpty(List.RemoveMatchingItems(Record.FieldValues(_), {"", null})))
+		    
+		in
+		    #"Removed Blank Rows"
+		```
+	lineageTag: a6bd73c4-0b56-40e3-b038-991ed6ddb704
+	queryGroup: 'Helper queries'
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression 'Object Type' =
+		let
+		    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("bZK7bsMwDEX/xXMGP+Q2GYNkaNEYMYygi+GBTpmGhSwHEp2if18qKPyqNZ4rvi5ZlkEUyouDVbAHhhocBtWqDNZhtEjjMEqE7lrdNWZgStiW2VLdMb4QWrDn68+gp6LnYJmY2lHYk+ACNXjqrnQblGdRMgTX2VHltcCF5BvBB7yj7lEc+n6MaRkmBeNI+Fv+OgA/4q7TPK4T+wmP9Ree+WTBOD1L4oc9kPnsyDGdM2T4EJN6PfFt5mjdTRLQfcibbKbCCWo9qCpcUGc+q2jhz39HVLzwbe6m8lMW7bgD9UcybGqJHi9E+Q0+8kjehpwbO6L8Ht/B0tSoNOovZSEofVyXmEe6aL/dHi9kpueR+ppbzWgNMB4vQVX9Ag==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ObjectTypeId = _t, ObjectTypeDescription = _t]),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ObjectTypeId", Int64.Type}, {"ObjectTypeDescription", type text}})
+		in
+		    #"Changed Type"
+	lineageTag: 721aa807-db8a-4b66-a00a-c7771e01c4ee
+	queryGroup: 'Helper queries'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression fnGetRelatedRefreshOperationsForSubOpTable = ```
+		let
+		    Source = (#"Days Ago To Start" as number, #"Days Ago To Finish" as number, #"Hours" as number,#"Pagination Hours" as number, #"Log Analytics Table" as text, #"UTC Offset Hours" as number) => let AnalyticsQuery =
+		let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/" & GetWorkspaceId & "/query", 
+		[Query=[#"query"="
+		 // Refreshes can contain several CommandEnd and DiscoveryEnd events that share the same rootActivityId. This report's data model typically has these in the Operation table, however
+		    // to keep these events grouped together as related to a refresh we move such events to the Suboperation table.
+		    set notruncation;
+		    let workspaceIdList = dynamic(['50EA7149-43DC-4DE3-8E56-4D5DBBC83E8F', 'C839BDCB-81B5-4DC3-9F92-818FE71432A1', '80FA5101-D77B-4AC3-B86A-EEAFE28E64AC']);
+		    
+		    let startDate = startofday(ago(" & Number.ToText(#"Days Ago To Start") & "d))- "& Number.ToText(#"UTC Offset Hours" * 60) & "m ;
+		    let startIngestionTime = datetime_add('hour', " & Number.ToText(#"Hours") & ",todatetime(startDate));
+		    let endIngestionTime = datetime_add('hour', " & Number.ToText(#"Pagination Hours") & ",todatetime(startIngestionTime));
+		
+		    let relatedRefreshEvents = "& #"Log Analytics Table" & "
+		    | where (TimeGenerated >= startIngestionTime and TimeGenerated < endIngestionTime) 
+		    | where ((OperationName in ('DiscoverEnd', 'QueryEnd', 'Error', 'Deadlock', 'SessionInitialize')) or (OperationName  == 'CommandEnd' and not(EventText contains_cs '<Refresh xmlns=' and OperationDetailName == 'Batch'))) and XmlaRequestId  in (
+		    // Subquery that returns rootActivityIds of all refresh operations. We expand the window -- NEED TO TEST IF  +/- 24h IS NECESSARY
+		    ("& #"Log Analytics Table" & " 
+		    | where (TimeGenerated >= startIngestionTime - 24h and TimeGenerated < endIngestionTime + 24h) // create a window in case these events happen outside of the base event's StartTime
+		    | where OperationName  == 'CommandEnd'
+		    | where OperationDetailName == 'Batch'
+		    | where EventText contains_cs '<Refresh xmlns=' 
+		    | project XmlaRequestId
+		    )
+		    )
+		    ;
+		    relatedRefreshEvents
+		    | extend TextDataHash = hash(EventText)
+		    | extend DurationMs = coalesce(DurationMs, 0)
+		    | extend User = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(User), User)
+		    | extend ExecutingUser = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(ExecutingUser), ExecutingUser)
+		| distinct ApplicationName, CpuTimeMs, ArtifactId, ArtifactName, ArtifactKind, DatasetMode, DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaObjectPath, XmlaSessionId, _ResourceId, _SubscriptionId
+		| project ApplicationName, CpuTimeMs, DatasetId = ArtifactId, Dataset = ArtifactName, ArtifactKind, DatasetMode, ['Duration (ms)'] = DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, StartTime = TimeGenerated,Microsecond=datetime_part(""microsecond"",TimeGenerated), Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaObjectPath, XmlaSessionId,  ResourceId = _ResourceId, SubscriptionId = _SubscriptionId 
+		    "],Timeout=#duration(0,0,60,0)])),
+		TypeMap = #table(
+		{ "AnalyticsTypes", "Type" }, 
+		{ 
+		{ "string",   Text.Type },
+		{ "int",      Int32.Type },
+		{ "long",     Int64.Type },
+		{ "real",     Double.Type },
+		{ "timespan", Duration.Type },
+		{ "datetime", DateTimeZone.Type },
+		{ "bool",     Logical.Type },
+		{ "guid",     Text.Type },
+		{ "dynamic",  Text.Type }
+		}),
+		DataTable = Source[tables]{0},
+		Columns = Table.FromRecords(DataTable[columns]),
+		ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+		Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+		Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+		in
+		Table
+		         
+		in
+		    AnalyticsQuery
+		in
+		    Source
+		```
+	lineageTag: 8fa0e5de-e537-4909-8950-4437ce8a68af
+	queryGroup: 'Kusto queries'
+
+	annotation PBI_ResultType = Function
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression fnGetRefreshSuboperations = ```
+		let
+		    Source = (#"Days Ago To Start" as number, #"Days Ago To Finish" as number, #"Hours" as number,#"Pagination Hours" as number,  #"Log Analytics Table" as text, #"UTC Offset Hours" as number) => let AnalyticsQuery =
+		let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/" & GetWorkspaceId & "/query", 
+		[Query=[#"query"="
+		set notruncation;
+		
+		
+		let startDate = startofday(ago(" & Number.ToText(#"Days Ago To Start") & "d))- "& Number.ToText(#"UTC Offset Hours" * 60) & "m ;
+		let startIngestionTime = datetime_add('hour', " & Number.ToText(#"Hours") & ",todatetime(startDate));
+		let endIngestionTime = datetime_add('hour', " & Number.ToText(#"Pagination Hours") & ",todatetime(startIngestionTime));
+		
+		"& #"Log Analytics Table" & " 
+		| where TimeGenerated >= startIngestionTime and TimeGenerated < endIngestionTime
+		| where (OperationName == 'ProgressReportEnd') // Refreshes
+		| extend TextDataHash = hash(EventText)
+		| extend DurationMs = coalesce(DurationMs, 0)
+		| extend Microsecond = datetime_part(""microsecond"",TimeGenerated)
+		| distinct ApplicationName, CpuTimeMs, ArtifactId, ArtifactName, ArtifactKind, DatasetMode, DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Microsecond, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, _ResourceId, _SubscriptionId
+		| project ApplicationName, CpuTimeMs, DatasetId = ArtifactId, Dataset = ArtifactName, ArtifactKind, DatasetMode, ['Duration (ms)'] = DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Microsecond, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, ResourceId = _ResourceId, SubscriptionId = _SubscriptionId, StartTime = TimeGenerated
+		
+		"],Timeout=#duration(0,0,60,0)])),
+		TypeMap = #table(
+		{ "AnalyticsTypes", "Type" }, 
+		{ 
+		{ "string",   Text.Type },
+		{ "int",      Int32.Type },
+		{ "long",     Int64.Type },
+		{ "real",     Double.Type },
+		{ "timespan", Duration.Type },
+		{ "datetime", DateTimeZone.Type },
+		{ "bool",     Logical.Type },
+		{ "guid",     Text.Type },
+		{ "dynamic",  Text.Type }
+		}),
+		DataTable = Source[tables]{0},
+		Columns = Table.FromRecords(DataTable[columns]),
+		ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+		Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+		Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+		in
+		Table
+		
+		in
+		    AnalyticsQuery
+		in
+		    Source
+		```
+	lineageTag: 7fa045e7-47a3-433e-8e79-2ef4ed038b71
+	queryGroup: 'Kusto queries'
+
+	annotation PBI_ResultType = Function
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression RefreshSuboperations = ```
+		let
+		    StartValue = (#"Days Ago To Start") - 1,
+		    Source = List.Generate(() => StartValue, each _ > #"Days Ago To Finish"-1, each _ - 1),
+		    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+		    #"Added Custom3" = Table.AddColumn(#"Converted to Table", "Hours", each List.Generate(() => 24-(#"Pagination Hours"), each _> -1, each _ -#"Pagination Hours")),
+		    #"Expanded Custom" = Table.ExpandListColumn(#"Added Custom3", "Hours"),
+		    #"Renamed Columns" = Table.RenameColumns(#"Expanded Custom",{{"Column1", "Ago"}}),
+		    #"Invoked Custom Function" = Table.AddColumn(#"Renamed Columns", "GetLogAnalytics_AS", each fnGetRefreshSuboperations([Ago], [Ago],[Hours],#"Pagination Hours", #"Log Analytics Table", #"UTC Offset Hours")),
+		    #"Expanded GetLogAnalytics_AS1" = Table.ExpandTableColumn(#"Invoked Custom Function", "GetLogAnalytics_AS", {"ApplicationName", "CpuTimeMs", "DatasetId", "Dataset", "ArtifactKind", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Microsecond", "Type", "User", "PowerBIWorkspaceId", "PowerBIWorkspaceName", "XmlaRequestId", "XmlaSessionId", "XmlaObjectPath", "ResourceId", "SubscriptionId", "StartTime", "TimeGenerated"}, {"ApplicationName", "CpuTimeMs", "DatasetId", "Dataset", "ArtifactKind", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Microsecond", "Type", "User", "WorkspaceId", "WorkspaceName", "XmlaRequestId", "XmlaSessionId", "XmlaObjectPath", "ResourceId", "SubscriptionId", "StartTime", "TimeGenerated"}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Expanded GetLogAnalytics_AS1",{"Ago","Hours"}),
+		    #"Removed Duplicates" = Table.Distinct(#"Removed Columns"),
+		    #"Removed Blank Rows" = Table.SelectRows(#"Removed Duplicates", each not List.IsEmpty(List.RemoveMatchingItems(Record.FieldValues(_), {"", null})))
+		    
+		in
+		    #"Removed Blank Rows"
+		```
+	lineageTag: e71d890f-d78f-4948-a679-3d0e334491b2
+	queryGroup: 'Helper queries'
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression fnGetAggSuboperations = ```
+		let
+		    Source = (#"Days Ago To Start" as number, #"Days Ago To Finish" as number, #"Hours" as number,#"Pagination Hours" as number, #"Log Analytics Table" as text, #"UTC Offset Hours" as number) => let AnalyticsQuery =
+		let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/" & GetWorkspaceId & "/query", 
+		[Query=[#"query"="
+		set notruncation;
+		let workspaceIdList = dynamic(['50EA7149-43DC-4DE3-8E56-4D5DBBC83E8F', 'C839BDCB-81B5-4DC3-9F92-818FE71432A1', '80FA5101-D77B-4AC3-B86A-EEAFE28E64AC']);
+		
+		let startDate = startofday(ago(" & Number.ToText(#"Days Ago To Start") & "d))- "& Number.ToText(#"UTC Offset Hours" * 60) & "m ;
+		let endDate = endofday(ago(" & Number.ToText(#"Days Ago To Finish") & "d));
+		let startIngestionTime = datetime_add('hour', " & Number.ToText(#"Hours") & ",todatetime(startDate));
+		let endIngestionTime = datetime_add('hour', " & Number.ToText(#"Pagination Hours") & ",todatetime(startIngestionTime));
+		
+		"& #"Log Analytics Table" &  " 
+		| where TimeGenerated >= startIngestionTime and TimeGenerated < endIngestionTime
+		| where (OperationName == 'AggregateTableRewriteQuery') 
+		| extend TextDataHash = hash(EventText)
+		| extend DurationMs = coalesce(DurationMs, 0)
+		| extend User = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(User), User)
+		| extend ExecutingUser = iff(toupper(PowerBIWorkspaceId) in (workspaceIdList), hash_md5(ExecutingUser), ExecutingUser)
+		| distinct ApplicationName, CpuTimeMs, ArtifactId, ArtifactName, ArtifactKind, DatasetMode, DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, _ResourceId, _SubscriptionId
+		| project ApplicationName, CpuTimeMs, DatasetId = ArtifactId, Dataset = ArtifactName, ArtifactKind, DatasetMode, ['Duration (ms)'] = DurationMs, EventText, ExecutingUser, OperationDetailName, OperationName, PremiumCapacityId, SourceSystem, Status, StatusCode, TenantId, TextDataHash, TimeGenerated, Type, User, PowerBIWorkspaceId, PowerBIWorkspaceName, XmlaRequestId, XmlaSessionId, XmlaObjectPath, ResourceId = _ResourceId, SubscriptionId = _SubscriptionId, StartTime = TimeGenerated
+		
+		"],Timeout=#duration(0,0,60,0)])),
+		TypeMap = #table(
+		{ "AnalyticsTypes", "Type" }, 
+		{ 
+		{ "string",   Text.Type },
+		{ "int",      Int32.Type },
+		{ "long",     Int64.Type },
+		{ "real",     Double.Type },
+		{ "timespan", Duration.Type },
+		{ "datetime", DateTimeZone.Type },
+		{ "bool",     Logical.Type },
+		{ "guid",     Text.Type },
+		{ "dynamic",  Text.Type }
+		}),
+		DataTable = Source[tables]{0},
+		Columns = Table.FromRecords(DataTable[columns]),
+		ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+		Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+		Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+		in
+		Table,
+		    #"Added Start DateTime (UTC offset)" = Table.AddColumn(#"AnalyticsQuery", "Start DateTime", each [TimeGenerated] + #duration(0,Number.RoundDown(#"UTC Offset Hours"),Number.RoundDown(60 * Number.Mod(#"UTC Offset Hours", 1)),0),type datetime),   
+		    #"Inserted StartDate" = Table.AddColumn(#"Added Start DateTime (UTC offset)", "Start Date", each DateTime.Date([Start DateTime]), type date),
+		    #"Start Time (s)" = Table.AddColumn(#"Inserted StartDate", "Start Time (s)", each DateTime.Time([Start DateTime]), type time),
+		    // #"Inserted StartDate" = Table.AddColumn(#"Added Start DateTime (UTC offset)", "Start Date", each Text.BeforeDelimiter(Text.From([Start DateTime], "en-us"), " ") as text),
+		    //#"Start Time (s)" = Table.AddColumn(#"Inserted StartDate", "Start Time (s)", each Text.BetweenDelimiters(Text.From([Start DateTime], "en-US"), " ", " ", 0, 1), type time),
+		        
+		    //#"Renamed Columns" = Table.RenameColumns(#"Start Time (s)",{{"DurationMs", "Duration (ms)"}}),
+		    #"Added End Date/Time" = Table.AddColumn(#"Start Time (s)", "EndTime", each [Start DateTime] + #duration(0, 0, 0, [#"Duration (ms)"] / 1000)),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Added End Date/Time",{{"Start Date", type date}, {"Start DateTime", type datetimezone}, {"EndTime", type datetimezone}}),
+		    #"Removed StartTime, TimeGenerated" = Table.RemoveColumns(#"Changed Type",{"TimeGenerated", "StartTime"})
+		in
+		    #"Removed StartTime, TimeGenerated"
+		in
+		    Source
+		```
+	lineageTag: 2efc6cbc-bace-4da8-b0c8-4edb39057561
+	queryGroup: 'Kusto queries'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Function
+
+/// Your offset in hours from UTC time. You can enter part hours, for example 5.5 for India.
+expression 'UTC Offset Hours' = 0 meta [IsParameterQuery=true, Type="Number", IsParameterQueryRequired=true]
+	lineageTag: 21d78875-0c22-44ca-b13a-730dcda605ac
+	queryGroup: Params
+
+	annotation PBI_ResultType = Number
+
+	annotation PBI_NavigationStepName = Navigation
+
+/// To avoid query failure reduce the pagination hours. This strategy is useful when the initial failing query is too "wide". (Kusto limits the number of records returned to the client to 500,000, and the overall data size for those records to 64 MB.)
+expression 'Pagination Hours' = 4 meta [IsParameterQuery=true, List={1, 2, 4, 8, 12, 24}, DefaultValue=4, Type="Number", IsParameterQueryRequired=true]
+	lineageTag: d5b01e3e-c1d3-4c39-9cb9-2b6819422ff8
+	queryGroup: Params
+
+	annotation PBI_ResultType = Number
+

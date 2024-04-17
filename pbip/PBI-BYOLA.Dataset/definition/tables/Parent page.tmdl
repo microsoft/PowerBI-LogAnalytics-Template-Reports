@@ -1,0 +1,79 @@
+table 'Parent page'
+	lineageTag: 0ea6d98b-b6d3-4e68-ba8b-c63fbccc6560
+
+	measure 'Navigation path' =
+			
+			IF (
+			    HASONEVALUE ( 'Parent page'[ParentPage] )
+			        && HASONEVALUE ( 'Child page'[Secondary page] )
+			        && HASONEVALUE ( 'Current page'[Current page] ),
+			    CONCATENATE (
+			        " | ",
+			        CONCATENATE (
+			            SELECTEDVALUE ( 'Parent page'[ParentPage] ),
+			            CONCATENATE (
+			                " | ",
+			                CONCATENATE (
+			                    SELECTEDVALUE ( 'Child page'[Secondary page] ),
+			                    CONCATENATE (
+			                        " | ",
+			                        SELECTEDVALUE ( 'Current page'[Current page] )
+			                    )
+			                )
+			            )
+			        )
+			    ),
+			    IF (
+			        HASONEVALUE ( 'Parent page'[ParentPage] )
+			            && HASONEVALUE ( 'Child page'[Secondary page] ),
+			        CONCATENATE (
+			            " | ",
+			            CONCATENATE (
+			                SELECTEDVALUE ( 'Parent page'[ParentPage] ),
+			                CONCATENATE (
+			                    " | ",
+			                    SELECTEDVALUE ( 'Child page'[Secondary page] )
+			                )
+			            )
+			        ),
+			        IF (
+			            HASONEVALUE ( 'Parent page'[ParentPage] ),
+			            CONCATENATE (
+			                " | ",
+			                CONCATENATE (
+			                    SELECTEDVALUE ( 'Parent page'[ParentPage] ),
+			                    CONCATENATE (
+			                        " | ",
+			                        SELECTEDVALUE ( 'Current page'[Current page] )
+			                    )
+			                )
+			            ),
+			            CONCATENATE (
+			                " | ",
+			                SELECTEDVALUE ( 'Current page'[Current page] )
+			            )
+			        )
+			    )
+			)
+		lineageTag: 8647b220-743e-45fe-932e-cc24926e3408
+
+	column ParentPage
+		dataType: string
+		lineageTag: 400d846e-d114-47a2-b2d6-697c3096b1dc
+		summarizeBy: none
+		sourceColumn: ParentPage
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Parent page-d0764d60-ac89-44a9-b126-860b4081b033' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("VcpLCoAwDEXRrZSOXYYuQFAcFAehRA3SKi9RcPeKn4Gzy+GG4BvOlM3plhLh8H0RfLdg1pUi/7TKo2R2FE12scdKMnLgAawT602tMr5JXqs3xuHUyERN4oMVsODK/gQ=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ParentPage = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ParentPage", type text}}),
+				    #"Replaced Value" = Table.ReplaceValue(#"Changed Type","Errors","Error summary",Replacer.ReplaceText,{"ParentPage"})
+				in
+				    #"Replaced Value"
+
+	annotation PBI_ResultType = Table
+
