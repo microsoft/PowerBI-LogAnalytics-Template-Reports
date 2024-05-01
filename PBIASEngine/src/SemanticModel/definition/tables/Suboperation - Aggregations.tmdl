@@ -1,0 +1,295 @@
+table 'Suboperation - Aggregations'
+	lineageTag: 45fe2879-ebec-46ef-94f8-4e2688743df4
+
+	column ApplicationName
+		dataType: string
+		lineageTag: 0e03f0f7-b362-4394-8675-6db362c2c8d8
+		summarizeBy: none
+		sourceColumn: ApplicationName
+
+		annotation SummarizationSetBy = Automatic
+
+	column CpuTimeMs
+		dataType: int64
+		formatString: 0
+		lineageTag: 6193a6d6-709b-4b48-a9ec-db9d044aa829
+		summarizeBy: sum
+		sourceColumn: CpuTimeMs
+
+		annotation SummarizationSetBy = Automatic
+
+	column DatasetId
+		dataType: string
+		lineageTag: 47384917-ec4d-4acf-a5cd-a114faea3e9e
+		summarizeBy: none
+		sourceColumn: DatasetId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Dataset
+		dataType: string
+		lineageTag: 7a1200b2-1f64-4e2a-b316-52216814daf8
+		summarizeBy: none
+		sourceColumn: Dataset
+
+		annotation SummarizationSetBy = Automatic
+
+	column ArtifactKind
+		dataType: string
+		lineageTag: 5648016e-89fc-4ea2-a4e2-a505ed833953
+		summarizeBy: none
+		sourceColumn: ArtifactKind
+
+		annotation SummarizationSetBy = Automatic
+
+	column DatasetMode
+		dataType: string
+		lineageTag: 39ca5cab-b268-4a7e-96a6-ebc2597907db
+		summarizeBy: none
+		sourceColumn: DatasetMode
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Duration (ms)'
+		dataType: int64
+		formatString: 0
+		lineageTag: e08588c1-32c5-4586-a127-dd05adac6592
+		summarizeBy: sum
+		sourceColumn: Duration (ms)
+
+		annotation SummarizationSetBy = Automatic
+
+	column EventText
+		dataType: string
+		lineageTag: 35375b87-3f5e-4885-b818-7ebabccf7083
+		summarizeBy: none
+		sourceColumn: EventText
+
+		annotation SummarizationSetBy = Automatic
+
+	column ExecutingUser
+		dataType: string
+		lineageTag: b4c5f5b2-e268-493c-9a10-c531950a0fbd
+		summarizeBy: none
+		sourceColumn: ExecutingUser
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Operation Detail'
+		dataType: string
+		lineageTag: 1207e242-275f-4090-9585-255129054ba4
+		summarizeBy: none
+		sourceColumn: Operation Detail
+
+		annotation SummarizationSetBy = Automatic
+
+	column Operation
+		dataType: string
+		lineageTag: 5a046aba-4a15-4406-864c-c661cabf90e2
+		summarizeBy: none
+		sourceColumn: Operation
+
+		annotation SummarizationSetBy = Automatic
+
+	column PremiumCapacityId
+		dataType: string
+		lineageTag: d6fff00e-ba0f-48da-865e-3a3b181c7b23
+		summarizeBy: none
+		sourceColumn: PremiumCapacityId
+
+		annotation SummarizationSetBy = Automatic
+
+	column SourceSystem
+		dataType: string
+		lineageTag: c619e4be-3cf8-45e2-9990-2db6ab9f7120
+		summarizeBy: none
+		sourceColumn: SourceSystem
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: string
+		lineageTag: 17596a09-a682-44bc-ac58-bf62ebc78d10
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column StatusCode
+		dataType: string
+		lineageTag: 413c7a8f-8fcf-47d3-bb9d-0296669ce08e
+		summarizeBy: none
+		sourceColumn: StatusCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column TenantId
+		dataType: string
+		lineageTag: 68adf520-2b19-4294-8f3c-093d4511adab
+		summarizeBy: none
+		sourceColumn: TenantId
+
+		annotation SummarizationSetBy = Automatic
+
+	column TextDataHash
+		dataType: string
+		lineageTag: d4ba2d4c-cd88-4147-a8e6-78ed435de86f
+		summarizeBy: none
+		sourceColumn: TextDataHash
+
+		annotation SummarizationSetBy = Automatic
+
+	column Type
+		dataType: string
+		lineageTag: 9aebf31b-0cf9-4a1a-b27a-dd3fb8ce2af3
+		summarizeBy: none
+		sourceColumn: Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column User
+		dataType: string
+		lineageTag: 2164cf56-4213-4bb3-a4ae-a643e321ff3d
+		summarizeBy: none
+		sourceColumn: User
+
+		annotation SummarizationSetBy = Automatic
+
+	column WorkspaceId
+		dataType: string
+		lineageTag: 3d1c2295-90de-4273-a396-dc7613e420db
+		summarizeBy: none
+		sourceColumn: WorkspaceId
+
+		annotation SummarizationSetBy = Automatic
+
+	column WorkspaceName
+		dataType: string
+		lineageTag: d8f1d93d-692a-4f7d-ae2e-b572bbf88cbe
+		summarizeBy: none
+		sourceColumn: WorkspaceName
+
+		annotation SummarizationSetBy = Automatic
+
+	column XmlaRequestId
+		dataType: string
+		lineageTag: 7c2b71f2-2de2-4b80-9d0a-514169c8b8ca
+		summarizeBy: none
+		sourceColumn: XmlaRequestId
+
+		annotation SummarizationSetBy = Automatic
+
+	column XmlaSessionId
+		dataType: string
+		lineageTag: d0675b2c-fcfe-4c38-a059-605cd5f5b927
+		summarizeBy: none
+		sourceColumn: XmlaSessionId
+
+		annotation SummarizationSetBy = Automatic
+
+	column XmlaObjectPath
+		dataType: string
+		lineageTag: ccaadf7c-ba24-44d7-aad6-b19e5a35a567
+		summarizeBy: none
+		sourceColumn: XmlaObjectPath
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResourceId
+		dataType: string
+		lineageTag: c46a4cf3-d43c-4836-a42a-e7f4cf79f431
+		summarizeBy: none
+		sourceColumn: ResourceId
+
+		annotation SummarizationSetBy = Automatic
+
+	column SubscriptionId
+		dataType: string
+		lineageTag: 78d72ef2-d0fe-4cab-97fa-c3e7760f1105
+		summarizeBy: none
+		sourceColumn: SubscriptionId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Start Date/Time'
+		dataType: dateTime
+		formatString: dd-mmm-yyyy hh:nn:ss AM/PM
+		lineageTag: 82486146-adb5-4a21-acf4-433fbddb1cd1
+		summarizeBy: none
+		sourceColumn: Start Date/Time
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column 'Start Date'
+		dataType: dateTime
+		formatString: dd-mmm-yyyy
+		lineageTag: 41e25308-a936-4978-a9c0-9fa7e586bb6d
+		summarizeBy: none
+		sourceColumn: Start Date
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column 'Start Time (s)'
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: 158b4b87-b7b4-4b81-b6eb-824971911cc2
+		summarizeBy: none
+		sourceColumn: Start Time (s)
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column EndTime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: ded676d6-f8b8-4a38-9b09-8ee61588c7ee
+		summarizeBy: none
+		sourceColumn: EndTime
+
+		annotation SummarizationSetBy = Automatic
+
+	column AggregationStatus
+		dataType: string
+		lineageTag: 223f9897-03a9-4e73-af19-28c610c46cac
+		summarizeBy: none
+		sourceColumn: AggregationStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Suboperation - Aggregations-68dd487a-4cd8-4ec7-b93b-f86cf2b9c6bc' = m
+		mode: import
+		source =
+				let
+				    StartValue = (#"Days Ago To Start") - 1,
+				    Source = List.Generate(() => StartValue, each _ > #"Days Ago To Finish"-1, each _ - 1),
+				    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Added Custom3" = Table.AddColumn(#"Converted to Table", "Hours", each List.Generate(() => 24-(#"Pagination Hours"), each _> -1, each _ -#"Pagination Hours")),
+				    #"Expanded Custom" = Table.ExpandListColumn(#"Added Custom3", "Hours"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Expanded Custom",{{"Column1", "Ago"}}),
+				    #"Invoked Custom Function" = Table.AddColumn(#"Renamed Columns", "GetLogAnalytics_AS", each fnGetAggSuboperations([Ago], [Ago], [Hours],#"Pagination Hours", #"Log Analytics Table",  #"UTC Offset Hours")),
+				    #"Expanded GetLogAnalytics_AS1" = Table.ExpandTableColumn(#"Invoked Custom Function", "GetLogAnalytics_AS", {"ApplicationName", "CpuTimeMs", "DatasetId", "Dataset", "ArtifactKind", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Type", "User", "PowerBIWorkspaceId", "PowerBIWorkspaceName", "XmlaRequestId", "XmlaSessionId", "XmlaObjectPath", "ResourceId", "SubscriptionId", "Start DateTime", "Start Date", "Start Time (s)", "EndTime"}, {"ApplicationName", "CpuTimeMs", "DatasetId", "Dataset", "ArtifactKind", "DatasetMode", "Duration (ms)", "EventText", "ExecutingUser", "OperationDetailName", "OperationName", "PremiumCapacityId", "SourceSystem", "Status", "StatusCode", "TenantId", "TextDataHash", "Type", "User", "WorkspaceId", "WorkspaceName", "XmlaRequestId", "XmlaSessionId", "XmlaObjectPath", "ResourceId", "SubscriptionId", "Start DateTime", "Start Date", "Start Time (s)", "EndTime"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Expanded GetLogAnalytics_AS1",{"Ago", "Hours"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Columns"),
+				    #"Removed Blank Rows" = Table.SelectRows(#"Removed Duplicates", each not List.IsEmpty(List.RemoveMatchingItems(Record.FieldValues(_), {"", null}))),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Blank Rows",{{"CpuTimeMs", Int64.Type}, {"Duration (ms)", Int64.Type}, {"Start DateTime", type datetimezone}, {"Start Date", type date}, {"Start Time (s)", type time}, {"EndTime", type datetimezone}, {"TextDataHash", type text}}),
+				    #"Removed Duplicates1" = Table.Distinct(#"Changed Type"),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Duplicates1",{{"Start DateTime", "Start Date/Time"}, {"OperationDetailName", "Operation Detail"}, {"OperationName", "Operation"}}),
+				    #"Duplicated Column" = Table.DuplicateColumn(#"Renamed Columns1", "EventText", "EventText - Copy"),
+				    #"Parsed JSON" = Table.TransformColumns(#"Duplicated Column",{{"EventText - Copy", Json.Document}}),
+				    #"Added AggregationStatus" = Table.ExpandRecordColumn(#"Parsed JSON", "EventText - Copy", {"matchingResult"}, {"AggregationStatus"})
+				in
+				    #"Added AggregationStatus"
+
+	annotation PBI_ResultType = Table
+

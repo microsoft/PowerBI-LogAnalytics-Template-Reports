@@ -1,0 +1,21 @@
+table User
+	lineageTag: 5112cf55-3173-40ba-b07c-7291acc5066a
+
+	column 'Executing User'
+		dataType: string
+		lineageTag: 2220ad8d-dde9-4b13-b298-311d2e5ea1a3
+		summarizeBy: none
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: Operation[Executing User]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition User-ec5eb1cf-3346-400b-9efb-4d33f7a39e2d = calculated
+		mode: import
+		source =
+				
+				DISTINCT('Operation'[Executing User])
+
+	annotation PBI_Id = 3621620e91c64be4a02cd2b234637fdc
+

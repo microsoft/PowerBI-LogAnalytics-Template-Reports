@@ -1,0 +1,39 @@
+table EndDateTable
+	lineageTag: ecc208e4-9b0e-44db-932a-70279f19c144
+
+	column Date
+		dataType: dateTime
+		formatString: dd-mmm-yy
+		lineageTag: 725208e6-7094-4448-9afb-5b874cde0387
+		summarizeBy: none
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: Calendar[Date]
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column UNIXEndDate =
+			
+			EndDateTable[Date]
+		dataType: int64
+		lineageTag: a12f1f45-f0f9-40d7-8d97-c1e5adc3600b
+		summarizeBy: sum
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition EndDateTable-6db9a522-d5e2-4428-a2f3-5ee0a3f9cd25 = calculated
+		mode: import
+		source =
+				
+				DISTINCT ( 'Calendar'[Date] )
+
+	annotation PBI_Id = dc21ad6678994667b94b9a40b4a849dc
+

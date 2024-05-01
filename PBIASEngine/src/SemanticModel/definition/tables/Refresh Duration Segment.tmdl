@@ -1,0 +1,49 @@
+table 'Refresh Duration Segment'
+	lineageTag: 98f3c0e3-3750-4e61-8f67-2529f26fd49f
+
+	column Min
+		dataType: int64
+		formatString: 0
+		lineageTag: 3a2f40c8-7137-47dc-9b72-c4bc9666f557
+		summarizeBy: sum
+		sourceColumn: Min
+
+		annotation SummarizationSetBy = Automatic
+
+	column Max
+		dataType: int64
+		formatString: 0
+		lineageTag: f75dc9a0-5ca2-4226-b74d-f5c3b82fb0c7
+		summarizeBy: sum
+		sourceColumn: Max
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segment
+		dataType: string
+		lineageTag: 3e9bffe5-8ba6-4b0d-9779-d440c39cf1aa
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Segment Key'
+		dataType: string
+		lineageTag: 14ab16c5-42c8-4be3-922d-8b3deb3a9709
+		summarizeBy: none
+		sourceColumn: Segment Key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Refresh Duration Segment-a1fb4674-73bb-40b1-94fe-fa19d1a26c08' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("Tc8xDsMgDIXhqyBvVT342QHlAj0FZaoqZWHs/WscBcL0pP8TiFpJiMlkHB/vn4h9cvcJalxXKdeouXOC9IdvDTMT9okccLJTWagVbd1lg+EYajvfm02xGA5OJVQOdWub6WTFGTRcCXeLeD2h1w+/rnzv1Nof", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Min = _t, Max = _t, Legend = _t, #"Segment Key" = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Min", Int64.Type}, {"Max", Int64.Type}, {"Legend", type text}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"Legend", "Segment"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

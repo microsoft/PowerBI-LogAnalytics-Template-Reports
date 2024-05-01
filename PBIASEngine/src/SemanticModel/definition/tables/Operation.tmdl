@@ -1,0 +1,524 @@
+table Operation
+	lineageTag: 91e1fd72-ac8c-4c99-8a32-d596158d09a1
+
+	column ApplicationName
+		dataType: string
+		lineageTag: 3a797c85-ddbf-45b4-ac76-9caa4ca4d505
+		summarizeBy: none
+		sourceColumn: ApplicationName
+
+		annotation SummarizationSetBy = Automatic
+
+	column DatasetId
+		dataType: string
+		lineageTag: 4b3df891-875c-4c2f-8082-1f78a95ed9c2
+		summarizeBy: none
+		sourceColumn: DatasetId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Executing User'
+		dataType: string
+		lineageTag: 040c1db4-1fa3-4589-820c-2e4cdb2e54ee
+		summarizeBy: none
+		sourceColumn: Executing User
+
+		annotation SummarizationSetBy = Automatic
+
+	column Operation
+		dataType: string
+		lineageTag: 19dcc753-121a-47ac-905a-a56e24f6e397
+		summarizeBy: none
+		sourceColumn: Operation
+
+		annotation SummarizationSetBy = Automatic
+
+	column PremiumCapacityId
+		dataType: string
+		lineageTag: f42be657-6381-45f2-bbed-697a067ad0fe
+		summarizeBy: none
+		sourceColumn: PremiumCapacityId
+
+		annotation SummarizationSetBy = Automatic
+
+	column SourceSystem
+		dataType: string
+		lineageTag: f40d973d-2db5-4f42-842f-4dda0b1ba31b
+		summarizeBy: none
+		sourceColumn: SourceSystem
+
+		annotation SummarizationSetBy = Automatic
+
+	column TenantId
+		dataType: string
+		lineageTag: 4b3e8e0d-77a0-41a4-a77e-5a61f7be5cd9
+		summarizeBy: none
+		sourceColumn: TenantId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Type
+		dataType: string
+		lineageTag: 5e3c2cb3-10d3-4e72-9987-ab5721be3ffc
+		summarizeBy: none
+		sourceColumn: Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column User
+		dataType: string
+		lineageTag: 621e10c7-95b3-411b-bd3a-04e4b4ebf236
+		summarizeBy: none
+		sourceColumn: User
+
+		annotation SummarizationSetBy = Automatic
+
+	column WorkspaceId
+		dataType: string
+		lineageTag: 05463c7c-f90f-4b9b-954b-b350701dd8fe
+		summarizeBy: none
+		sourceColumn: WorkspaceId
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResourceId
+		dataType: string
+		lineageTag: 0216ca1a-a75c-4626-b729-bfc64bd2e404
+		summarizeBy: none
+		sourceColumn: ResourceId
+
+		annotation SummarizationSetBy = Automatic
+
+	column SubscriptionId
+		dataType: string
+		lineageTag: 65eb1a89-ecc3-4153-ba67-76177297aa40
+		summarizeBy: none
+		sourceColumn: SubscriptionId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Start Date'
+		dataType: dateTime
+		formatString: dd-mmm-yyyy
+		lineageTag: b31efda4-cf7a-4f77-98f6-a745b5cde729
+		summarizeBy: none
+		sourceColumn: Start Date
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column TextDataHash
+		dataType: string
+		lineageTag: 90f14270-f22f-4d42-a98b-579e547ddf7c
+		summarizeBy: none
+		sourceColumn: TextDataHash
+
+		annotation SummarizationSetBy = Automatic
+
+	column ReportId
+		dataType: string
+		lineageTag: fd86f6c1-a843-45bc-9ac5-fb446cfb761c
+		summarizeBy: none
+		sourceColumn: ReportId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Scenario ID' =
+			
+			VAR _operationName = 'Operation'[Operation]
+			VAR _RAID = 'Operation'[XmlaRequestId]
+			VAR _hasSubEvent =
+			    FILTER (
+			        'Suboperation - Refresh',
+			        'Suboperation - Refresh'[XmlaRequestId] = _RAID
+			    )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        AND (
+			            _operationName = "CommandEnd",
+			            IFERROR (
+			                SEARCH (
+			                    "<Refresh xmlns=",
+			                    Operation[EventText]
+			                ),
+			                -1
+			            ) > 0
+			        ), 1,
+			        // Refresh
+			        _operationName = "QueryEnd", 2,
+			        _operationName = "Error", 3,
+			        _operationName = "DiscoverEnd", 4,
+			        _operationName = "SessionInitialize", 5,
+			        _operationName = "Deadlock", 6,
+			        0
+			    )
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: fc0d4da8-5121-4ba1-9f78-2d66a0d5c4f5
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'End Date/Time'
+		dataType: dateTime
+		formatString: dd-mmm-yyyy hh:nn:ss AM/PM
+		lineageTag: 48a22bb1-16f4-4fb0-9476-e8adf37b8e1e
+		summarizeBy: none
+		sourceColumn: End Date/Time
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column 'Start Time'
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: 3118844a-3c45-420a-92c2-78efaa165987
+		summarizeBy: none
+		sourceColumn: Start Time
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column 'Duration (ms)'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 80c83465-65f6-43e8-8a84-c0e201b39b9c
+		summarizeBy: sum
+		sourceColumn: Duration (ms)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Start Date/Time'
+		dataType: dateTime
+		formatString: dd-mmm-yyyy hh:nn:ss AM/PM
+		lineageTag: 125ed4a8-b4c4-4bc3-9776-4b980667b684
+		summarizeBy: none
+		sourceColumn: Start Date/Time
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column 'CPUTime (calculated)' =
+			
+			[CPU Time (ms) Total]
+		dataType: int64
+		formatString: #,0
+		lineageTag: 3f24a401-5937-4476-b136-213e57b59ca9
+		summarizeBy: sum
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Query Duration Key' =
+			
+			VAR CurrentDuration = Operation[Duration (ms)]
+			VAR FilterSegment =
+			    FILTER (
+			        'Query Duration Segment',
+			        AND (
+			            'Query Duration Segment'[Min] <= CurrentDuration,
+			            'Query Duration Segment'[Max] > CurrentDuration
+			        )
+			    )
+			VAR Result =
+			    CALCULATE (
+			        DISTINCT ( 'Query Duration Segment'[Query Duration Segment Key] ),
+			        FilterSegment
+			    )
+			RETURN
+			    Result
+		dataType: string
+		isHidden
+		lineageTag: 0c3b8d8b-b366-4bf2-b044-c1859fe2654a
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column EventText
+		dataType: string
+		lineageTag: 320ce942-5a33-41bf-9fbf-2af2ea496f98
+		summarizeBy: none
+		sourceColumn: EventText
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Operation Detail'
+		dataType: string
+		lineageTag: 7b5b568f-ee46-4019-b060-e4c8bad46bf6
+		summarizeBy: none
+		sourceColumn: Operation Detail
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: string
+		lineageTag: 40276180-ea2b-48a5-b658-813491b59517
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column StatusCode
+		dataType: int64
+		lineageTag: 3224277b-02be-457d-8e65-8f86348493b3
+		summarizeBy: count
+		sourceColumn: StatusCode
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column XmlaSessionId
+		dataType: string
+		lineageTag: 3f4b0ec5-9f01-4a51-bfed-7a96b110070f
+		summarizeBy: none
+		sourceColumn: XmlaSessionId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'CPUTime (ms)'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 6e06e1f7-e1fd-4159-8518-9e575b75128d
+		summarizeBy: sum
+		sourceColumn: CPUTime (ms)
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+	column Workspace
+		dataType: string
+		lineageTag: cb64634f-5e54-4b1d-8575-7a928609247a
+		summarizeBy: none
+		sourceColumn: Workspace
+
+		annotation SummarizationSetBy = Automatic
+
+	column ArtifactKind
+		dataType: string
+		lineageTag: 07dbd8c6-d961-42c4-964d-ca508ae1a9c2
+		summarizeBy: none
+		sourceColumn: ArtifactKind
+
+		annotation SummarizationSetBy = Automatic
+
+	column DatasetMode
+		dataType: string
+		lineageTag: d41d7593-ceb7-439b-81e4-ba538ad8c869
+		summarizeBy: none
+		sourceColumn: DatasetMode
+
+		annotation SummarizationSetBy = Automatic
+
+	column Dataset
+		dataType: string
+		lineageTag: 0039f371-e951-4774-b7de-bf89cf17ed78
+		summarizeBy: none
+		sourceColumn: Dataset
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Query Suboperation Key'
+		dataType: string
+		lineageTag: 6c12a280-5084-4753-8c36-27b06baf4b1a
+		summarizeBy: none
+		sourceColumn: Query Suboperation Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Refresh Suboperation Key'
+		dataType: string
+		lineageTag: e31e3a47-4359-4d4e-ab6d-15cc954a79c1
+		summarizeBy: none
+		sourceColumn: Refresh Suboperation Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column XmlaRequestId
+		dataType: string
+		lineageTag: 13ee311f-f95c-4224-9add-cb3097d6e2d6
+		summarizeBy: none
+		sourceColumn: XmlaRequestId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'End Time' =
+			
+			Operation[End Date/Time]
+		dataType: dateTime
+		lineageTag: d40a71ef-6b47-46f0-b95e-5b217225c69e
+		summarizeBy: none
+		isDataTypeInferred
+
+		changedProperty = DataType
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Start_Time =
+			
+			Operation[Start Time]
+		dataType: dateTime
+		formatString: hh:nn AM/PM
+		lineageTag: f24b86d5-2ef8-4b4c-b0cc-197817760cb9
+		summarizeBy: none
+		isDataTypeInferred
+
+		changedProperty = FormatString
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column 'Operation StartDate' =
+			
+			FORMAT (
+			    Operation[Start Date/Time],
+			    "dd-mmm-yyyy"
+			)
+		dataType: string
+		lineageTag: 4770555f-8b99-4a88-9be9-98fb1a5fcf4f
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Agg Suboperation Key'
+		dataType: string
+		lineageTag: fb62d29c-f1c3-4ece-944d-d3f706fb9992
+		summarizeBy: none
+		sourceColumn: Agg Suboperation Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsAggregationUsed =
+			
+			IF (
+			    CONTAINS (
+			        'Suboperation - Aggregations',
+			        'Suboperation - Aggregations'[XmlaRequestId], Operation[Agg Suboperation Key],
+			        'Suboperation - Aggregations'[AggregationStatus], "matchFound"
+			    ),
+			    "Yes",
+			    "No"
+			)
+		dataType: string
+		lineageTag: 80822c50-06cc-4ac9-af13-1287a48884e6
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsAggregationUsed(1/0) =
+			
+			IF (
+			    CONTAINS (
+			        'Suboperation - Aggregations',
+			        'Suboperation - Aggregations'[XmlaRequestId], Operation[Agg Suboperation Key],
+			        'Suboperation - Aggregations'[AggregationStatus], "matchFound"
+			    ),
+			    1,
+			    0
+			)
+		dataType: int64
+		formatString: 0
+		lineageTag: 0cc94610-5bfe-4505-a67d-4924bede3a70
+		summarizeBy: sum
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Scenario name' =
+			SWITCH(Operation[Scenario ID],
+			0,"Unknown",
+			1,"Refresh completed",
+			2,"Query completed",
+			3,"Error reported",
+			4,"Discover completed",
+			5,"User session started",
+			6,"Deadlock occurred")
+		dataType: string
+		lineageTag: 7fc52ca6-6c8c-4d6e-b192-f00ea0635d35
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'DatasetId Hierarchy'
+		lineageTag: b23151c6-fe0a-4c32-87a4-e8da4f671d31
+
+		level DatasetId
+			lineageTag: 34c6c56d-e628-4b26-ae67-b26c6f2af9ff
+			column: DatasetId
+
+		level Dataset
+			lineageTag: 98019e49-3bd7-463f-ae48-1e32843403cf
+			column: Dataset
+
+	partition Operation-f50c4154-bb43-459b-b0cf-1cdfcb8316be = m
+		mode: import
+		source =
+				let
+				    Source = OperationExceptRefresh_stage,
+				    #"Merged Queries" = Table.NestedJoin(Source, {"XmlaRequestId"}, RefreshOperations, {"XmlaRequestId"}, "Suboperation", JoinKind.LeftAnti),
+				    #"Appended Query" = Table.Combine({#"Merged Queries", RefreshOperations}),
+				
+				    //#"Renamed Columns" = Table.RenameColumns(AnalyticsQuery,{{"DurationMs", "Duration (ms)"}}),
+				    #"Added Start DateTime (UTC offset)" = Table.AddColumn(#"Appended Query", "Start DateTime", each[StartTime] + #duration(0,Number.RoundDown(#"UTC Offset Hours"),Number.RoundDown(60 * Number.Mod(#"UTC Offset Hours", 1)),0),type datetime),
+				    #"Inserted StartDate" = Table.AddColumn(#"Added Start DateTime (UTC offset)", "Start Date", each DateTime.Date([Start DateTime]), type date),
+				    #"Inserted Time" = Table.AddColumn(#"Inserted StartDate", "Start Time (s)", each DateTime.Time([Start DateTime]), type time),
+				    #"Removed Original StartTime" = Table.RemoveColumns(#"Inserted Time",{"StartTime"}),
+				    #"Added Custom" = Table.AddColumn(#"Removed Original StartTime", "EndTime", each [Start DateTime] + #duration(0, 0, 0, [#"Duration (ms)"] / 1000)),
+				
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Added Custom",{{"CpuTimeMs", Int64.Type}, {"Duration (ms)", Int64.Type}, {"EndTime", type datetimezone}, {"TextDataHash", Int64.Type}, {"Start DateTime", type datetimezone}, {"Start Date", type date}, {"Start Time (s)", type time}}),
+				    #"Renamed to Start Date/Time" = Table.RenameColumns(#"Changed Type1",{{"Start DateTime", "Start Date/Time"}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Renamed to Start Date/Time",{{"CpuTimeMs", "CPUTime (ms)"}}),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Renamed Columns",{{"TextDataHash", type text}}),
+				    #"Removed Duplicates" = Table.Distinct(#"Changed Type2"),
+				
+				    #"Changed Type3" = Table.TransformColumnTypes(#"Removed Duplicates",{{"StatusCode", type number}}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Changed Type3",{{"EndTime", "End Date/Time"}, {"WorkspaceName", "Workspace"}, {"OperationName", "Operation"}, {"OperationDetailName", "Operation Detail"}, {"Start Time (s)", "Start Time"}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Renamed Columns1",{"Suboperation"}),
+				    #"Added Index" = Table.AddIndexColumn(#"Removed Columns", "Index", 0, 1, Int64.Type),
+				    #"Add QuerySuboperationKey" = Table.AddColumn(#"Added Index", "Query Suboperation Key", each if [QuerySubeventKey] = "" or [QuerySubeventKey] = null then [Index] else [QuerySubeventKey]),
+				    #"Add RefreshSuboperationKey" = Table.AddColumn(#"Add QuerySuboperationKey", "Refresh Suboperation Key", each if [RefreshSubeventKey] = null then [Index] else [RefreshSubeventKey]),
+				    #"Add AggSuboperationKey" = Table.AddColumn(#"Add RefreshSuboperationKey", "Agg Suboperation Key", each if [QuerySubeventKey] = "" or [QuerySubeventKey] = null then [Index] else [QuerySubeventKey]),
+				
+				    #"Remove Columns" = Table.RemoveColumns(#"Add AggSuboperationKey",{"QuerySubeventKey", "RefreshSubeventKey", "Index"}),
+				    #"Renamed Columns2" = Table.RenameColumns(#"Remove Columns",{{"ExecutingUser", "Executing User"}})
+				
+				in
+				    #"Renamed Columns2"
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+
