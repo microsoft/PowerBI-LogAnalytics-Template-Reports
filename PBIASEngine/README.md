@@ -6,11 +6,11 @@ This report allows you to visualize the activity of datasets hosted in the Analy
 - SE Duration measures are currently blank. This is because Vertipaq Storage Engine events are not yet supported in the Preview.
 - If you find the report takes a very long time to refresh and appears to be stuck, try to load a shorter period of time. We have built the Power Query logic with Log analytics Query limits in mind, but it is possible you are hitting limits. Another thing to try is to go to the Regional Settings -> Locale in the template and change it to US date format. We have had reports of European customers having the report load blocked becuase of date conversion errors.
 
-## Datasets Template app goals
+## Goals
 
-The goal of the Template app is to build a tool that can be used to analyze AS Engine behavior in general and to help isolate and debug specific problems in depth. You can slice any operation by using CapacityId, Workspace Name, Dataset Name, and ReportId to give you the necessary context.
+The goal of the report template  is to build a tool that can be used to analyze AS Engine behavior in general and to help isolate and debug specific problems in depth. You can slice any operation by using CapacityId, Workspace Name, Dataset Name, and ReportId to give you the necessary context.
 
-The following are some examples of questions that you can answer with the Template app.
+The following are some examples of questions that you can answer with this template.
 
 ### General
 
@@ -39,17 +39,17 @@ The following are some examples of questions that you can answer with the Templa
 
 ### Others
 
-Since the Template app contains various AS Engine events, you can customize it to answer questions related to other events such as Discover or Notification.
+Since the template contains various AS Engine events, you can customize it to answer questions related to other events such as Discover or Notification.
 
-## App data source
+## Data source
 
-The Template app loads data from a single Azure Log Analytics workspace.
+The template loads data from a single Azure Log Analytics workspace.
 
-It doesn't matter if the Log Analytics workspace contains data from many Power BI workspaces. It also doesn't matter which level of administrator configured logging. The log schemas are exactly the same for every role, so there's only one version of the Template app. There are different levels of aggregation to accommodate a range of use cases. For more information, see [Using Log Analytics in Power BI](https://learn.microsoft.com/power-bi/transform-model/log-analytics/desktop-log-analytics-overview)
+It doesn't matter if the Log Analytics workspace contains data from many Power BI workspaces. It also doesn't matter which level of administrator configured logging. The log schemas are exactly the same for every role, so there's only one version of the template. There are different levels of aggregation to accommodate a range of use cases. For more information, see [Using Log Analytics in Power BI](https://learn.microsoft.com/power-bi/transform-model/log-analytics/desktop-log-analytics-overview)
 
 ## App data model
 
-The Template app has the following tables and relationships:
+The template has the following tables and relationships:
 
 * User
 * Query Duration Segment
@@ -71,7 +71,7 @@ The following parameters are defined in the template:
 
 |**Parameter**  |**Description**  |
 |---------|---------|
-|Days Ago To Start |Load data from the specified day to the time the call was initiated. The maximum value you can select is 30 days. However, your Premium capacity memory limits apply to this parameter. If those limits are exceeded, the Template app might fail to refresh.|
+|Days Ago To Start |Load data from the specified day to the time the call was initiated. The maximum value you can select is 30 days. However, your Premium capacity memory limits apply to this parameter. If those limits are exceeded, the template might fail to refresh.|
 |Days Ago To Finish |Load data up to the specified number of days ago. Use 0 for today. |
 |Log Analytics Table |Preset values corresponding to the Log Analytics source table:<br> - PowerBIDatasetsWorkspace<br> - PowerBIDatasetsTenant <br> Currently only PowerBIDatasetsWorkspace is supported. |
 |Log Analytics WorkspaceId |Globally unique identifier (GUID) of the Azure Log Analytics workspace containing the AS Engine data. |
@@ -84,13 +84,13 @@ Pagination Hours | This parameter is optional. It describes the time window for 
 
 ### App workflow
 
-The following diagram shows the workflow for the Template app.
+The following diagram shows the workflow for the template.
 
-![Screenshot of a diagram showing the major pages of the Template app and some important available drillthroughs.](./media/template-app-as-engine-flow.png)
+![Screenshot of a diagram showing the major pages of the template and some important available drillthroughs.](./media/template-app-as-engine-flow.png)
 
 ### Workspace summary
 
-This page shows engine activities and load at a workspace level, focusing on identifying interesting datasets, reports, or users. You can use this page to identify a high-level issue to analyze further by navigating or drilling through to other pages of the Template app.
+This page shows engine activities and load at a workspace level, focusing on identifying interesting datasets, reports, or users. You can use this page to identify a high-level issue to analyze further by navigating or drilling through to other pages of the template.
 
 ### Engine activities
 
@@ -138,9 +138,9 @@ This page allows you to zoom in on a specific error by viewing the detailed even
 
 ### Navigate in the app
 
-The Template app contains a navigation bar at top of the page to navigate to the expected page.
+The template contains a navigation bar at top of the page to navigate to the expected page.
 
-![Screenshot of the navigation bar for the Template app.](./media/nav-bar.png)
+![Screenshot of the navigation bar for the template.](./media/nav-bar.png)
 
 Also, there's a back button on the top-left corner to go back to the previous page and an info icon that provides information about the page.
 
@@ -150,7 +150,7 @@ Also, there's a back button on the top-left corner to go back to the previous pa
 
 Every page has a filter button below the navigation bar that you can select to open the pop-up filter panel and make selections.
 
-![Screenshot highlighting the filter button at the top of the page on the Template app.](./media/filters.png)
+![Screenshot highlighting the filter button at the top of the page on the template.](./media/filters.png)
 
 The current values of the filters are displayed in the smart narrative next to the filters button. You can clear all the slicers by using the **Clear** button on the top-left corner or close the window by using the **X** button in the top-right corner.
 
@@ -160,7 +160,7 @@ The current values of the filters are displayed in the smart narrative next to t
 
 >If more than one value is selected for a filter, the smart narrative displays one of the values followed by "and more".
 
-## Datasets Template App pages
+## Datasets template pages
 
 * [Workspace Summary](#page-workspace-summary)
 * [Engine Activities](#page-engine-activities-also-a-drillthrough)
@@ -180,7 +180,7 @@ The current values of the filters are displayed in the smart narrative next to t
 
 This page is targeted at a workspace administrator and shows activities and statistics related to datasets and queries. It also identifies top reports by load, details popular datasets by operations or users, and allows drillthrough to various pages to get further details.
 
-![Screenshot of the Workspace summary page in the Template app.](./media/workspace-summary.png)
+![Screenshot of the Workspace summary page in the template.](./media/workspace-summary.png)
 
 The following table lists the visuals displayed on the workspace summary page according to their location on the page.
 
@@ -194,7 +194,7 @@ The following table lists the visuals displayed on the workspace summary page ac
 
 This page provides a trend overview of AS Engine activities by day and by hour. It allows you to identify peaks or outliers on a day and then see how that activity breaks down by hour when you cross-highlight by selecting a day.
 
-![Screenshot of the Engine activities page in the Template app.](./media/engine-activities.png)
+![Screenshot of the Engine activities page in the template.](./media/engine-activities.png)
 
 The following table lists the visuals displayed on the engine activities page according to their location on the page.
 
@@ -220,7 +220,7 @@ The following table lists the visuals displayed on the engine activity details p
 
 This page provides an overview of dataset refreshes occurring over a selected period. It allows you to identify long running refreshes and visualize which ones are happening in parallel. This page allows you to select any data refresh and drill through to a page called **Dataset refresh detail**.
 
-![Screenshot of the Dataset refreshes page in the Template app.](./media/dataset-refreshes.png)
+![Screenshot of the Dataset refreshes page in the template.](./media/dataset-refreshes.png)
 
 The following table lists the visuals displayed on the dataset refreshes page according to their location on the page.
 
@@ -245,13 +245,13 @@ The following table lists the visuals displayed on the dataset refresh detail pa
 
 ### Page: Query statistics (also a drillthrough)
 
-This page focuses on queries in bulk. The goal is to identify which queries are common and which queries have high variability. The Template app provides percentiles and deviations to give you an idea of both typical and more extreme measurements.
+This page focuses on queries in bulk. The goal is to identify which queries are common and which queries have high variability. The template provides percentiles and deviations to give you an idea of both typical and more extreme measurements.
 
 Any query can be drilled through to a page called **Query detail** to see details about its execution. Among other pieces of information, you can see the internal Vertipaq Queries or external DirectQuery text and duration depending on the model type.
 
 You can also drill through to a page called **Query history** that shows you all the execution of that query over a period, and its performance trend.
 
-![Screenshot of the Query statistics page in the Template app.](./media/query-statistics.png)
+![Screenshot of the Query statistics page in the template.](./media/query-statistics.png)
 
 The following table lists the visuals displayed on the query statistics page according to their location on the page.
 
@@ -295,7 +295,7 @@ The cards on the right display the total number of executions of a given query, 
 
 This page gives an overview of the user activities across the workspace. It also gives information about the most active users for a period by capturing their CPU time usage, query usage, and operations performed.
 
-![Screenshot of the User activities page in the Template app.](./media/user-activities.png)
+![Screenshot of the User activities page in the template.](./media/user-activities.png)
 
 The following table lists the visuals displayed on the user activities page according to their location on the page.
 
@@ -324,7 +324,7 @@ The following table lists the visuals displayed on the user detail page accordin
 
 This page provides an overview of errors or failed executions over time, allowing you to view individual operations that reported an error status.
 
-![Screenshot of the Error summary page in the Template app.](./media/error-summary.png)
+![Screenshot of the Error summary page in the template.](./media/error-summary.png)
 
 The following table lists the visuals displayed on the error summary page according to their location on the page.
 
@@ -350,20 +350,20 @@ The following table lists the visuals displayed on the error detail page accordi
 
 ### Help
 
-This page provides a help summary of different features throughout the Template app. It also has support links that can be used for any support assistance.
+This page provides a help summary of different features throughout the template. It also has support links that can be used for any support assistance.
 
-![Screenshot of the Help page that's in the Template app.](./media/help.png)
+![Screenshot of the Help page that's in the template.](./media/help.png)
 
 
->Each visual in the Template app has a **?** icon. Select this icon to learn more about the visual.
+>Each visual in the template has a **?** icon. Select this icon to learn more about the visual.
 
 ## Considerations and limitations
 
 * Log Analytics Query Limits
 
-  * Kusto has limits in terms of the number of records returned and the overall size of the data based on the query. The Template app has been built to work around these limits by pulling data in sequential chunks. However, you might still exceed these limits, resulting in a refresh failure in the Template app. For more information, see [Query Limits](https://learn.microsoft.com/azure/data-explorer/kusto/concepts/querylimits).
+  * Kusto has limits in terms of the number of records returned and the overall size of the data based on the query. The template has been built to work around these limits by pulling data in sequential chunks. However, you might still exceed these limits, resulting in a refresh failure in the template. For more information, see [Query Limits](https://learn.microsoft.com/azure/data-explorer/kusto/concepts/querylimits).
 
-  * If the Template app refresh fails due to the previously mentioned data limits, you can configure the Pagination Hours parameter. Setting a lower value here lowers the amount of data retrieved from Log Analytics per call by increasing the number of calls.
+  * If the template refresh fails due to the previously mentioned data limits, you can configure the Pagination Hours parameter. Setting a lower value here lowers the amount of data retrieved from Log Analytics per call by increasing the number of calls.
 
 * The following events are intentionally excluded from Log Analytics during the Preview:
   
