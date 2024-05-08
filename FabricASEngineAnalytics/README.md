@@ -6,7 +6,6 @@ Download Power BI report template: [here](./FabricASEngineAnalytics.pbit)
 
 ## Setup
 
-
 The following parameters are defined in the template:
 
 |**Parameter**  |**Description**  |
