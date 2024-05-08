@@ -4,7 +4,7 @@ Power BI allows users to configure connections to Azure Log Analytics where they
 
 Available templates:
 
-- [**Log Analytics for Analysis Services Engine:**](./PBIASEngine/README.md) This template allows you to visualize the activity of datasets hosted in the Analysis Services Engine in Power BI workspaces. You can use it to identify load patterns, investigate user actions, look at query performance trends, visualize refreshes, and much more! 
+- [**Log Analytics for Analysis Services Engine report template:**](./PBIASEngine/README.md) This template allows you to visualize the activity of datasets hosted in the Analysis Services Engine in Power BI workspaces. You can use it to identify load patterns, investigate user actions, look at query performance trends, visualize refreshes, and much more! 
 
 ## Contributing
 

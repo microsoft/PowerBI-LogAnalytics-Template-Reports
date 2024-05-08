@@ -1,0 +1,25 @@
+relationship 086b675e-274c-4064-bf8f-1a52083ffb20
+	crossFilteringBehavior: bothDirections
+	fromColumn: 'Progress Report'.XmlaRequestId
+	toColumn: Command.XmlaRequestId
+
+relationship AutoDetected_74913799-9edb-461e-aac8-4fe5ac1deba3
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: Command.XmlaRequestId
+	toColumn: ExecutionMetrics.XmlaRequestId
+
+relationship AutoDetected_03328baf-6698-424d-a38e-18f7c93a884e
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: Query.XmlaRequestId
+	toColumn: ExecutionMetrics.XmlaRequestId
+
+relationship c6b643c3-8f85-f638-421f-cf20cbaf5776
+	fromColumn: ExecutionMetrics.dimDate
+	toColumn: Calendar.DateTime
+
+relationship 8065981e-7e5e-5f67-61b7-d0d4ec58d89d
+	fromColumn: ExecutionMetrics.ArtifactId
+	toColumn: Artifact.ArtifactId
+

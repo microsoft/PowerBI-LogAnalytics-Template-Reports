@@ -1,6 +1,8 @@
-# Power BI Log Analytics for Analysis Services Engine
+# Power BI Log Analytics for Analysis Services Engine report template
 
 This report allows you to visualize the activity of datasets hosted in the Analysis Services Engine in Power BI workspaces. You can use it to identify load patterns, investigate user actions, look at query performance trends, visualize refreshes, and much more! 
+
+Download Power BI report template: [here](./PBIASEngine.pbit)
 
 ## Known Issues
 - SE Duration measures are currently blank. This is because Vertipaq Storage Engine events are not yet supported in the Preview.
