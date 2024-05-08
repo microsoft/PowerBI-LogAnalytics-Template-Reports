@@ -1,8 +1,10 @@
 # Power BI Log Analytics Template Reports
 
-Power BI allows users to configure connections to Azure Log Analytics where they can retain detailed historical activity data. This repo hosts Power BI Template (.pbit) reports that you can point to your Azure Log Analytics workspaces to load data and get inisights right away! 
+Power BI allows users to configure connections to Azure Log Analytics where they can retain detailed historical activity data. This repo hosts Power BI Templates (.pbit) reports that you can point to your Azure Log Analytics workspaces to load data and get insights.
 
 Available templates:
+
+- [**Fabric Analysis Services Engine Analytics report template:**](./FabricASEngineAnalytics/README.md) TODO: Description 
 
 - [**Log Analytics for Analysis Services Engine report template:**](./PBIASEngine/README.md) This template allows you to visualize the activity of datasets hosted in the Analysis Services Engine in Power BI workspaces. You can use it to identify load patterns, investigate user actions, look at query performance trends, visualize refreshes, and much more! 
 
