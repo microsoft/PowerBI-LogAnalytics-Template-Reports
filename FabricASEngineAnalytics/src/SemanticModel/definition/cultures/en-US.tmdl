@@ -4563,7 +4563,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "Command",
-			          "ConceptualProperty": "Command Count"
+			          "ConceptualProperty": "Cmd XmlaRequestId"
 			        }
 			      },
 			      "State": "Generated",
@@ -4609,7 +4609,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "Command",
-			          "ConceptualProperty": "Request Duration (s)"
+			          "ConceptualProperty": "Avg Cmd Duration (s)"
 			        }
 			      },
 			      "State": "Generated",
@@ -6296,7 +6296,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "Query",
-			          "ConceptualProperty": "Query Count"
+			          "ConceptualProperty": "Qry XmlaRequestId"
 			        }
 			      },
 			      "State": "Generated",
@@ -6779,7 +6779,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "Command",
-			          "ConceptualProperty": "Request Start"
+			          "ConceptualProperty": "Command Start"
 			        }
 			      },
 			      "State": "Generated",
@@ -6908,7 +6908,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "Command",
-			          "ConceptualProperty": "Request End"
+			          "ConceptualProperty": "Command End"
 			        }
 			      },
 			      "State": "Generated",
@@ -10025,7 +10025,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "ExecutionMetrics",
-			          "ConceptualProperty": "Mashup Peak Memory (MB)"
+			          "ConceptualProperty": "Refresh Mashup Peak Memory (MB)"
 			        }
 			      },
 			      "State": "Generated",
@@ -10057,7 +10057,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "ExecutionMetrics",
-			          "ConceptualProperty": "Mashup CPU (s)"
+			          "ConceptualProperty": "Refresh Mashup CPU (s)"
 			        }
 			      },
 			      "State": "Generated",
@@ -11729,7 +11729,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "Query",
-			          "ConceptualProperty": "Query CPU Max (s)"
+			          "ConceptualProperty": "Max Qry CPU (s)"
 			        }
 			      },
 			      "State": "Generated",
@@ -11790,7 +11790,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "Query",
-			          "ConceptualProperty": "Query Duration Max (s)"
+			          "ConceptualProperty": "Max Qry Duration (s)"
 			        }
 			      },
 			      "State": "Generated",
@@ -16345,7 +16345,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "ExecutionMetrics",
-			          "ConceptualProperty": "Operation Count"
+			          "ConceptualProperty": "XmlaRequestId Cnt"
 			        }
 			      },
 			      "State": "Generated",

@@ -10,8 +10,8 @@
       "nodes": [
         {
           "location": {
-            "x": 10,
-            "y": 149.84441891600704
+            "x": 982.266831565021,
+            "y": 37.184193574756137
           },
           "nodeIndex": "Progress Report",
           "nodeLineageTag": "601fa947-27b9-4435-83b5-38a0fb1dcd5a",
@@ -23,8 +23,8 @@
         },
         {
           "location": {
-            "x": 894.10132969171718,
-            "y": 668.8467832303669
+            "x": 0,
+            "y": 613.47450912575323
           },
           "nodeIndex": "Calendar",
           "nodeLineageTag": "f6e78640-383c-40d3-bf96-c66fe86b0bc3",
@@ -36,34 +36,34 @@
         },
         {
           "location": {
-            "x": 621.98940810145064,
-            "y": 314.57068723210187
+            "x": 0,
+            "y": 42.121583300529
           },
           "nodeIndex": "Artifact",
           "nodeLineageTag": "dd9e522d-6584-41ec-8e2e-d7aff0a6882a",
           "size": {
-            "height": 176,
+            "height": 214.0309812092508,
             "width": 234
           },
           "zIndex": 6
         },
         {
           "location": {
-            "x": 334.93262024291511,
-            "y": -10
+            "x": 649.4116489708349,
+            "y": 612.55090777463465
           },
           "nodeIndex": "Query",
           "nodeLineageTag": "7b523ff6-7678-4578-ac93-cb27cc13beb5",
           "size": {
-            "height": 300,
+            "height": 249.72585218969118,
             "width": 234
           },
           "zIndex": 3
         },
         {
           "location": {
-            "x": 10.729008353515212,
-            "y": 500.95142636285743
+            "x": 644.33685684208831,
+            "y": 35.340244769366336
           },
           "nodeIndex": "Command",
           "nodeLineageTag": "4d38904d-2fa7-4d91-a6c2-865c8f3a3ef8",
@@ -75,8 +75,8 @@
         },
         {
           "location": {
-            "x": 296.4642443548513,
-            "y": 343.74666392585942
+            "x": 354.73078603281647,
+            "y": 294.73981690571929
           },
           "nodeIndex": "ExecutionMetrics",
           "nodeLineageTag": "388b868c-ddfb-49a5-bcd6-8cc2a18f5aa1",
@@ -88,7 +88,7 @@
         }
       ],
       "name": "All tables",
-      "zoomValue": 74.0499959711097,
+      "zoomValue": 73.596473757458867,
       "pinKeyFieldsToTop": false,
       "showExtraHeaderInfo": false,
       "hideKeyFieldsWhenCollapsed": false,

@@ -1,7 +1,7 @@
 table Query
 	lineageTag: 7b523ff6-7678-4578-ac93-cb27cc13beb5
 
-	measure 'Query Count' = COUNTROWS(Query)
+	measure 'Qry XmlaRequestId' = COUNTROWS(Query)
 		formatString: #,0
 		lineageTag: 0608bb7c-7c85-40b4-86b8-1bda223c392a
 
@@ -15,7 +15,7 @@ table Query
 
 		annotation PBI_FormatHint = {"isDecimal":true}
 
-	measure 'Query / Min' = DIVIDE([Query Count],([Query End]-[Query Start])*24*60)
+	measure 'Query / Min' = DIVIDE([Qry XmlaRequestId],([Query End]-[Query Start])*24*60)
 		formatString: #,0
 		lineageTag: 9bd1cb78-37d3-4975-a8e9-ccfb0df7ac00
 
@@ -81,13 +81,13 @@ table Query
 
 		changedProperty = FormatString
 
-	measure 'Failed Query' = CALCULATE([Query Count],Query[StatusCode]<0)
+	measure 'Failed Query' = CALCULATE([Qry XmlaRequestId],Query[StatusCode]<0)
 		formatString: #,0
 		lineageTag: 22e2163e-ebc6-4e3a-9fde-4b07a8bcb2d3
 
 		changedProperty = FormatString
 
-	measure 'Failed Query %' = DIVIDE([Failed Query], [Query Count])
+	measure 'Failed Query %' = DIVIDE([Failed Query], [Qry XmlaRequestId])
 		formatString: 0.0%;-0.0%;0.0%
 		lineageTag: 7a0d153c-802b-4962-8936-b42719262d94
 
@@ -113,19 +113,19 @@ table Query
 		formatString: 0
 		lineageTag: 34478581-2e6d-4ca8-8798-a10d94f2cb4a
 
-	measure 'Query CPU Max (s)' = MAX(Query[CpuTimeMs])/1000
+	measure 'Max Qry CPU (s)' = MAX(Query[CpuTimeMs])/1000
 		formatString: #,0
 		lineageTag: 830d0c62-6e46-4d6a-bd67-d6d23f3822e8
 
-	measure 'Query Duration Max (s)' = MAX(Query[DurationMs])/1000
+	measure 'Max Qry Duration (s)' = MAX(Query[DurationMs])/1000
 		formatString: #,0
 		lineageTag: d7da7070-dfa7-4cb5-a33f-e09e3444eb17
 
-	measure 'Capacity Throttling Count' = CALCULATE([Query Count],ExecutionMetrics[capacityThrottlingMs]>0)
+	measure 'Query Capacity Throttling Count' = CALCULATE([Qry XmlaRequestId],ExecutionMetrics[capacityThrottlingMs]>0)
 		formatString: #,0
 		lineageTag: 000a1816-7773-4323-b3a2-f4041d10edfa
 
-	measure 'Capacity Throttling %' = DIVIDE([Capacity Throttling Count],[Query Count])
+	measure 'Query Capacity Throttling %' = DIVIDE([Query Capacity Throttling Count],[Qry XmlaRequestId])
 		formatString: 0.0%;-0.0%;0.0%
 		lineageTag: 4a758f28-e0f8-46c8-851e-bfff4bb21445
 
@@ -135,6 +135,10 @@ table Query
 	measure 'Query Duration (s)' = AVERAGE(Query[DurationMs])/1000
 		formatString: #,0.0
 		lineageTag: 971ade5a-294b-492e-9f96-a2731cd88600
+
+	measure 'Average Qry CPU (s)' = AVERAGE(Query[CpuTimeMs])/1000
+		formatString: #,0.0
+		lineageTag: 5bfd082e-278d-4028-806f-6a4c270cfd1f
 
 	column XmlaRequestId
 		dataType: string

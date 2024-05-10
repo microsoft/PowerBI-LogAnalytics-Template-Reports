@@ -13,14 +13,14 @@ table ExecutionMetrics
 
 		annotation PBI_FormatHint = {"isDateTimeCustom":true}
 
-	measure 'Mashup CPU (s)' = CALCULATE(SUM(ExecutionMetrics[mEngineCpuTimeMs])/1000, VALUES(Command[XmlaRequestId]))
+	measure 'Refresh Mashup CPU (s)' = CALCULATE(SUM(ExecutionMetrics[mEngineCpuTimeMs])/1000, VALUES(Command[XmlaRequestId]))
 		formatString: #,0
 		displayFolder: Refresh (Write)
 		lineageTag: 5096257d-d517-445a-a673-3d24dcb031ca
 
 		annotation PBI_FormatHint = {"isDecimal":true}
 
-	measure 'Mashup Peak Memory (MB)' = CALCULATE( SUM(ExecutionMetrics[mEnginePeakMemoryKB])/1024, VALUES(Command[XmlaRequestId]))
+	measure 'Refresh Mashup Peak Memory (MB)' = CALCULATE( SUM(ExecutionMetrics[mEnginePeakMemoryKB])/1024, VALUES(Command[XmlaRequestId]))
 		formatString: #,0
 		displayFolder: Refresh (Write)
 		lineageTag: 31da23da-1677-4849-b123-62edb2903bd9
@@ -37,7 +37,7 @@ table ExecutionMetrics
 		displayFolder: Query (Read)
 		lineageTag: a2e803a0-740c-4943-8bfb-3892c82361c0
 
-	measure 'Operation Count' = COUNTROWS(ExecutionMetrics)
+	measure 'XmlaRequestId Cnt' = COUNTROWS(ExecutionMetrics)
 		formatString: #,0
 		lineageTag: 0dfe542a-1246-491b-a185-c65af0506863
 
@@ -60,7 +60,75 @@ table ExecutionMetrics
 
 	measure 'Direct Query Count' = SUM(ExecutionMetrics[directQueryRequestCount])
 		formatString: #,0
+		displayFolder: Query (Read)
 		lineageTag: b9fb39e2-047d-416f-b26f-60b0b3506402
+
+	measure 'Capacity Throttling Count' = CALCULATE([XmlaRequestId Cnt],ExecutionMetrics[capacityThrottlingMs]>0)
+		formatString: #,0
+		lineageTag: 62068258-8cf2-4d78-984a-5ef4eacca967
+
+	measure 'Total Rows' = SUM(ExecutionMetrics[vertipaqTotalRows])
+		formatString: #,0
+		displayFolder: Refresh (Write)
+		lineageTag: 76cf8bb0-58dd-4b64-9178-6a6be088bb5a
+
+	measure 'Cmd Peak Mem (MB)' = CALCULATE( MAX(ExecutionMetrics[approximatePeakMemConsumptionKB])/1024, Command)
+		formatString: #,0
+		displayFolder: Refresh (Write)
+		lineageTag: fbf19b1c-8c3b-4566-a25c-d16cae179cc3
+
+	measure 'Qry Peak Mem (MB)' = CALCULATE( MAX(ExecutionMetrics[approximatePeakMemConsumptionKB])/1024, Query)
+		formatString: #,0
+		displayFolder: Query (Read)
+		lineageTag: 920d9d79-eb55-4558-ab53-4763cc4b6f61
+
+	measure 'Failed Requests' = CALCULATE([XmlaRequestId Cnt], ExecutionMetrics[opStatus]="Failed")
+		formatString: #,0
+		lineageTag: d530a49d-4123-40ff-865e-ae3a6d1f59af
+
+	measure 'Failed XmlaRequestId %' = DIVIDE([Failed Requests],[XmlaRequestId Cnt])
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: c1e1ba84-1561-4b43-92f0-a1f30900de4d
+
+	measure 'Data Source Throttling Count' = CALCULATE([XmlaRequestId Cnt],ExecutionMetrics[datasourceConnectionThrottleTimeMs]>0)
+		formatString: #,0
+		displayFolder: Query (Read)
+		lineageTag: bfe7946c-3aaa-49f7-ae00-f3f25a5ea545
+
+	measure 'Direct Query Connection Time (ms)' = SUM(ExecutionMetrics[directQueryConnectionTimeMs])
+		formatString: #,0
+		displayFolder: Query (Read)
+		lineageTag: bcc532d7-5e38-4a71-90fb-1e5e51f1a09b
+
+	measure 'Direct Query Iteration Time (ms)' = SUM(ExecutionMetrics[directQueryIterationTimeMs])
+		formatString: 0
+		displayFolder: Query (Read)
+		lineageTag: ffa1ed7b-f322-4f90-859d-3de79799a1f8
+
+	measure 'Direct Query Total Rows' = SUM(ExecutionMetrics[directQueryTotalRows])
+		formatString: #,0
+		displayFolder: Query (Read)
+		lineageTag: fec9e331-66aa-47e0-85fa-86df22cd0c63
+
+	measure 'Direct Query Total Time (ms)' = SUM(ExecutionMetrics[directQueryTotalTimeMs])
+		formatString: #,0
+		displayFolder: Query (Read)
+		lineageTag: fe0e9e35-138f-4146-b22c-b2000943fcd6
+
+	measure 'Query Processing CPU (ms)' = SUM(ExecutionMetrics[queryProcessingCpuTimeMs])
+		formatString: #,0
+		displayFolder: Query (Read)
+		lineageTag: bc25238a-dfff-44ad-950d-aca060215250
+
+	measure 'Query Result Rows' = CALCULATE( SUM(ExecutionMetrics[queryResultRows]), VALUES(Query[XmlaRequestId]))
+		formatString: #,0
+		displayFolder: Query (Read)
+		lineageTag: ce2b6c9a-50b9-426a-a960-adb1007a6ec3
+
+	measure 'Data Source Throttling (ms)' = SUM(ExecutionMetrics[datasourceConnectionThrottleTimeMs])
+		formatString: 0
+		displayFolder: Query (Read)
+		lineageTag: 527056d6-0cb1-4807-a7a7-711fc147227a
 
 	column XmlaRequestId
 		dataType: string
@@ -111,7 +179,7 @@ table ExecutionMetrics
 	column approximatePeakMemConsumptionKB
 		dataType: int64
 		formatString: 0
-		displayFolder: Query (Read)
+		displayFolder: General
 		lineageTag: 088d9a75-16b4-4122-b7e1-3c4682971cbe
 		summarizeBy: sum
 		sourceColumn: approximatePeakMemConsumptionKB
@@ -189,21 +257,27 @@ table ExecutionMetrics
 
 	column mEngineCpuTimeMs
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Refresh (Write)
 		lineageTag: 9ec26384-52d8-4690-b26e-7239cfc8790d
 		summarizeBy: sum
 		sourceColumn: mEngineCpuTimeMs
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column mEnginePeakMemoryKB
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Refresh (Write)
 		lineageTag: c79102c6-7f3b-4623-89cc-5a2edca7f76b
 		summarizeBy: sum
 		sourceColumn: mEnginePeakMemoryKB
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -231,21 +305,27 @@ table ExecutionMetrics
 
 	column queryProcessingCpuTimeMs
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Query (Read)
 		lineageTag: 22878225-45a0-42de-b4f8-dc87c0ca098e
 		summarizeBy: sum
 		sourceColumn: queryProcessingCpuTimeMs
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column queryResultRows
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Query (Read)
 		lineageTag: 8e9aeee5-0f35-4f09-87b1-a34118cacde1
 		summarizeBy: sum
 		sourceColumn: queryResultRows
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -315,11 +395,14 @@ table ExecutionMetrics
 
 	column vertipaqTotalRows
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Refresh (Write)
 		lineageTag: e360842d-610d-41fd-91fb-d41e1184291b
 		summarizeBy: sum
 		sourceColumn: vertipaqTotalRows
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -382,71 +465,89 @@ table ExecutionMetrics
 
 	column datasourceConnectionThrottleTimeMs
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Query (Read)
 		lineageTag: 38653a63-fbcd-44e2-8a3d-19d908f35220
 		summarizeBy: sum
 		sourceColumn: datasourceConnectionThrottleTimeMs
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column directQueryConnectionTimeMs
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Query (Read)
 		lineageTag: 0095902f-3552-4b3e-b53f-0183808189bb
 		summarizeBy: sum
 		sourceColumn: directQueryConnectionTimeMs
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column directQueryIterationTimeMs
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Query (Read)
 		lineageTag: e3154183-4adb-4f8a-8e73-26b0c40ac6b6
 		summarizeBy: sum
 		sourceColumn: directQueryIterationTimeMs
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column directQueryRequestCount
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Query (Read)
 		lineageTag: 9c5fe078-705c-4ffe-ac25-1a02439223ac
 		summarizeBy: sum
 		sourceColumn: directQueryRequestCount
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column directQueryTimeoutMs
 		dataType: int64
-		formatString: 0
+		formatString: #,0
 		displayFolder: Query (Read)
 		lineageTag: c944e7d6-d05f-4be1-acb0-3ddef082dda2
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: directQueryTimeoutMs
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column directQueryTotalRows
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Query (Read)
 		lineageTag: eb194a9a-d549-4f00-b1be-b29e9d848ff8
 		summarizeBy: sum
 		sourceColumn: directQueryTotalRows
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column directQueryTotalTimeMs
 		dataType: int64
+		isHidden
 		formatString: 0
 		displayFolder: Query (Read)
 		lineageTag: 7a90f684-2826-4e09-a23a-8c06e2ab10b0
 		summarizeBy: sum
 		sourceColumn: directQueryTotalTimeMs
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -478,16 +579,6 @@ table ExecutionMetrics
 
 		annotation SummarizationSetBy = Automatic
 
-	column capacityThrottlingMs
-		dataType: int64
-		formatString: 0
-		displayFolder: Query (Read)
-		lineageTag: 48eb7d52-8cdd-4811-ac31-3314f0aa2ce3
-		summarizeBy: sum
-		sourceColumn: capacityThrottlingMs
-
-		annotation SummarizationSetBy = Automatic
-
 	column LogCnt
 		dataType: int64
 		isHidden
@@ -497,6 +588,23 @@ table ExecutionMetrics
 		sourceColumn: LogCnt
 
 		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ApplicationName
+		dataType: string
+		lineageTag: 3e5cde74-e758-4135-8ff3-137ed84aa1b7
+		summarizeBy: none
+		sourceColumn: ApplicationName
+
+		annotation SummarizationSetBy = Automatic
+
+	column capacityThrottlingMs
+		dataType: int64
+		formatString: 0
+		lineageTag: d62f167f-b2bc-4e9e-94a2-1b6de2a869d4
+		summarizeBy: sum
+		sourceColumn: capacityThrottlingMs
 
 		annotation SummarizationSetBy = Automatic
 
@@ -521,13 +629,13 @@ table ExecutionMetrics
 				| extend effectiveClaims=coalesce(Identity.effectiveClaims.upn, customData=Identity.effectiveClaims.customData)
 				;
 				let ExecutionMetrics = window | where OperationName == 'ExecutionMetrics'
-				| summarize arg_max(TimeGenerated, ArtifactId, ArtifactName, PowerBIWorkspaceId, PowerBIWorkspaceName, PremiumCapacityId, User, ExecutingUser, effectiveClaims, CorrelationId, e=EventText) by XmlaRequestId
+				| summarize arg_max(TimeGenerated, ArtifactId, ArtifactName, PowerBIWorkspaceId, PowerBIWorkspaceName, PremiumCapacityId, User, ExecutingUser, effectiveClaims, CorrelationId, e=EventText, ApplicationName) by XmlaRequestId
 				;
 				let NoExecutionMetrics = window | where ArtifactId !=''
 				| where OperationName startswith 'ProgressReport' and OperationDetailName != 'ParallelSession' or OperationName startswith 'Command' or OperationName startswith 'Query'
-				| summarize arg_min(timeStart=TimeGenerated, ArtifactId, ArtifactName, PowerBIWorkspaceId, PowerBIWorkspaceName, PremiumCapacityId, User, ExecutingUser, effectiveClaims), arg_max(timeEnd=TimeGenerated, opStatus=Status) by XmlaRequestId
+				| summarize arg_min(timeStart=TimeGenerated, ArtifactId, ArtifactName, PowerBIWorkspaceId, PowerBIWorkspaceName, PremiumCapacityId, User, ExecutingUser, effectiveClaims, ApplicationName), arg_max(timeEnd=TimeGenerated, opStatus=Status) by XmlaRequestId
 				| join kind=leftanti (ExecutionMetrics | summarize by XmlaRequestId) on XmlaRequestId
-				| extend dimDate=bin(timeStart, 30s), operationType='No ExecutionMetrics';
+				;
 				ExecutionMetrics
 				| extend operationType=
 				    iif(
@@ -591,13 +699,21 @@ table ExecutionMetrics
 				    | summarize arg_max(TimeGenerated, StatusCode, ErrorMessage=EventText) by XmlaRequestId, CorrelationId)
 				    on XmlaRequestId, CorrelationId
 				| extend e=parse_json(e) 
-				| project ArtifactId, ArtifactName, PowerBIWorkspaceId, PremiumCapacityId, PowerBIWorkspaceName, operationType, opStatus, XmlaRequestId, StatusCode, ErrorMessage, User, ExecutingUser, effectiveClaims
-				, e| evaluate bag_unpack(e) //columns updated dynamically when refreshing in the PBI Desktop. Comment out this line and uncomment the line below, and the last line, to specify columns for the incremental refresh in the service.
-				//, timeStart=todatetime(e.timeStart), timeEnd=todatetime(e.timeEnd), durationMs=toint(e.durationMs), totalCpuTimeMs=toint(e.totalCpuTimeMs), approximatePeakMemConsumptionKB=toint(e.approximatePeakMemConsumptionKB), executionDelayMs=toint(e.executionDelayMs), vertipaqJobCpuTimeMs=toint(e.vertipaqJobCpuTimeMs), commandType=toint(e.commandType), errorCount=toint(e.errorCount), intendedUsage=toint(e.intendedUsage), discoverType=toint(e.discoverType), refreshParallelism=toint(e.refreshParallelism), vertipaqTotalRows =toint(e.vertipaqTotalRows), mEngineCpuTimeMs=toint(e.mEngineCpuTimeMs), mEnginePeakMemoryKB =toint(e.mEnginePeakMemoryKB), tabularConnectionTimeoutMs=toint(e.tabularConnectionTimeoutMs), qsoReplicaVersion=e.qsoReplicaVersion, queryDialect=toint(e.queryDialect), queryResultRows=toint(e.queryResultRows), queryProcessingCpuTimeMs=toint(e.queryProcessingCpuTimeMs), capacityThrottlingMs=toint(e.capacityThrottlingMs), directQueryRequestCount=toint(e.directQueryRequestCount), directQueryTotalRows=toint(e.directQueryTotalRows), datasourceConnectionThrottleTimeMs=toint(e.datasourceConnectionThrottleTimeMs), directQueryConnectionTimeMs=toint(e.directQueryConnectionTimeMs), directQueryExecutionTimeMs=toint(e.directQueryExecutionTimeMs), directQueryIterationTimeMs=toint(e.directQueryIterationTimeMs), directQueryTotalTimeMs=toint(e.directQueryTotalTimeMs), directQueryTimeoutMs=toint(e.directQueryTimeoutMs)
-				| extend dimDate=bin(timeStart, 30s), qsoReplicaVersion=FileTimeToDateTime(qsoReplicaVersion), intendedUsage=ConvertIntendedUsage(intendedUsage)
+				| project ArtifactId, ArtifactName, PowerBIWorkspaceId, PremiumCapacityId, PowerBIWorkspaceName, operationType, opStatus, XmlaRequestId, StatusCode, ErrorMessage, User, ExecutingUser, effectiveClaims, ApplicationName
+				//, e| evaluate bag_unpack(e) //columns updated dynamically when refreshing in the PBI Desktop.
+				, timeStart=todatetime(e.timeStart), timeEnd=todatetime(e.timeEnd), durationMs=toint(e.durationMs), totalCpuTimeMs=toint(e.totalCpuTimeMs), approximatePeakMemConsumptionKB=toint(e.approximatePeakMemConsumptionKB), executionDelayMs=toint(e.executionDelayMs), vertipaqJobCpuTimeMs=toint(e.vertipaqJobCpuTimeMs), commandType=toint(e.commandType), errorCount=toint(e.errorCount), intendedUsage=toint(e.intendedUsage), discoverType=toint(e.discoverType), refreshParallelism=toint(e.refreshParallelism), vertipaqTotalRows =toint(e.vertipaqTotalRows), mEngineCpuTimeMs=toint(e.mEngineCpuTimeMs), mEnginePeakMemoryKB =toint(e.mEnginePeakMemoryKB), tabularConnectionTimeoutMs=toint(e.tabularConnectionTimeoutMs), qsoReplicaVersion=e.qsoReplicaVersion, queryDialect=toint(e.queryDialect), queryResultRows=toint(e.queryResultRows), queryProcessingCpuTimeMs=toint(e.queryProcessingCpuTimeMs), capacityThrottlingMs=toint(e.capacityThrottlingMs), directQueryRequestCount=toint(e.directQueryRequestCount), directQueryTotalRows=toint(e.directQueryTotalRows), datasourceConnectionThrottleTimeMs=toint(e.datasourceConnectionThrottleTimeMs), directQueryConnectionTimeMs=toint(e.directQueryConnectionTimeMs), directQueryExecutionTimeMs=toint(e.directQueryExecutionTimeMs), directQueryIterationTimeMs=toint(e.directQueryIterationTimeMs), directQueryTotalTimeMs=toint(e.directQueryTotalTimeMs), directQueryTimeoutMs=toint(e.directQueryTimeoutMs)
+				| extend qsoReplicaVersion=FileTimeToDateTime(qsoReplicaVersion), intendedUsage=ConvertIntendedUsage(intendedUsage)
 				| union NoExecutionMetrics
 				| lookup (window | summarize LogCnt=count() by XmlaRequestId) on XmlaRequestId
+				| extend dimDate=bin(timeStart, 30s)
+				, ApplicationName=case (ApplicationName startswith 'PowerBI - Model Change Tracker', 'Power BI - Model Change Tracker'
+				, ApplicationName startswith 'Power BI Desktop', 'Power BI Desktop', ApplicationName startswith 'DAX Studio', 'DAX Studio'
+				, ApplicationName startswith 'Deployment Utility', 'Deployment Utility', ApplicationName startswith 'PowerBI - ExploreService', 'PowerBI - ExploreService'
+				, ApplicationName startswith 'Microsoft SQL Server Management Studio', 'Microsoft SQL Server Management Studio'
+				, ApplicationName startswith 'Tabular', 'TabularEditor', ApplicationName startswith 'PowerBI - NaturalLanguageService', 'PowerBI - NaturalLanguageService'
+				, ApplicationName startswith 'SQL Server Profiler', 'SQL Server Profiler', ApplicationName)
 				| where timeEnd >=RangeStartTime //and timeEnd <RangeEndTime
+				| extend timeStart=timeStart+"& Number.ToText(#"UTC Offset Hours") &"h, timeEnd=timeEnd+"& Number.ToText(#"UTC Offset Hours") &"h, qsoReplicaVersion=qsoReplicaVersion+"& Number.ToText(#"UTC Offset Hours") &"h 
 				",#"x-ms-app"="OmsAnalyticsPBI",#"prefer"="ai.response-thinning=true"],Timeout=#duration(0,0,5,0)])),
 				TypeMap = #table(
 				{ "AnalyticsTypes", "Type" }, 

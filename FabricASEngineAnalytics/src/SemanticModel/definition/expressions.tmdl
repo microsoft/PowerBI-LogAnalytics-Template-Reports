@@ -1,23 +1,23 @@
-/// The unique identifier of the Azure Log Analytics workspace containing the events from the Analysis Services engine.
-expression 'Azure Log Analytics Workspace Id' = "bec544b6-e5d2-42b7-a705-40108a461d89" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type text]
+/// Globally unique identifier (GUID) of the Azure Log Analytics workspace containing the AS Engine trace events.
+expression 'Azure Log Analytics Workspace Id' = "bec544b6-e5d2-42b7-a705-40108a461d89" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 	lineageTag: d6e9abb2-bdd1-47ed-b240-4067a94ef2ce
 
 	annotation PBI_ResultType = Text
 
 /// The offset in hours from UTC time. You can enter part hours, for example 5.5 for India.
-expression 'UTC Offset Hours' = 0 meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type number, List = {-4, -3, -2, -1, 0, 1, 2, 3, 4}, DefaultValue = 0]
+expression 'UTC Offset Hours' = -5 meta [IsParameterQuery=true, List={-4, -3, -2, -1, 0, 1, 2, 3, 4}, DefaultValue=0, Type="Number", IsParameterQueryRequired=true]
 	lineageTag: b66254e3-404c-4297-965c-5c9c7d8a0114
 
 	annotation PBI_ResultType = Number
 
 /// Optionally enter a fabric artifact (semantic model) Id.
-expression 'Fabric Item Id' = "" meta [IsParameterQuery = true, IsParameterQueryRequired = false, Type = type text]
+expression 'Fabric Item Id' = null meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=false]
 	lineageTag: 774d6ea6-d213-4425-9467-a5535c9761be
 
-	annotation PBI_ResultType = Text
+	annotation PBI_ResultType = Null
 
 /// Optionally enter a fabric workspace Id.
-expression 'Fabric Workspace Id' = "" meta [IsParameterQuery = true, IsParameterQueryRequired = false, Type = type text]
+expression 'Fabric Workspace Id' = "eb63fc9c-8ecd-4c6b-b925-a9c93bd0b81e" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=false]
 	lineageTag: a40798a4-9cf1-4d77-9bd9-7b2b38dea7bb
 
 	annotation PBI_ResultType = Text
@@ -33,13 +33,13 @@ expression _ArtifactId = if #"Fabric Item Id" is null then "" else #"Fabric Item
 	annotation PBI_ResultType = Text
 
 /// From how many days ago should the report start loading data? (For example: 30,28,21,14,7)
-expression 'Days Ago To Start' = 7 meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type number, List = {30, 28, 21, 14, 7}, DefaultValue = 7]
+expression 'Days Ago To Start' = 7 meta [IsParameterQuery=true, List={30, 28, 21, 14, 7}, DefaultValue=7, Type="Number", IsParameterQueryRequired=true]
 	lineageTag: 9e2fcce4-928f-467a-bc65-48a0b76c5240
 
 	annotation PBI_ResultType = Number
 
 /// Until how many days ago should the report stop loading data? (For example: 0,7,14,21 use 0 for today)
-expression 'Days Ago To Finish' = 0 meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type number, List = {21, 14, 7, 0}, DefaultValue = 0]
+expression 'Days Ago To Finish' = 0 meta [IsParameterQuery=true, List={21, 14, 7, 0}, DefaultValue=0, Type="Number", IsParameterQueryRequired=true]
 	lineageTag: 63eb1048-2e3e-4e6e-98f3-76716bb62a0a
 
 	annotation PBI_ResultType = Number
