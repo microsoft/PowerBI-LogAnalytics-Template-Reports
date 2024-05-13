@@ -267,6 +267,7 @@ table 'Progress Report'
 
 	column XmlaRequestId
 		dataType: string
+		isHidden
 		sourceProviderType: nvarchar(max)
 		lineageTag: 4ba020ef-fefc-4984-81d7-3d7a23571c76
 		summarizeBy: none

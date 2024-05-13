@@ -3,9 +3,12 @@ table EventText
 
 	column XmlaRequestId
 		dataType: string
+		isHidden
 		lineageTag: d767d976-d74c-49fc-bb5e-3c69901f176c
 		summarizeBy: none
 		sourceColumn: XmlaRequestId
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
