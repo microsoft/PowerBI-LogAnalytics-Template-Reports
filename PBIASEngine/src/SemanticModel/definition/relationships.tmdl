@@ -1,0 +1,32 @@
+relationship b528a2e5-c53a-4084-bf3e-46b79c82c51e
+	fromColumn: Operation.'Start Time'
+	toColumn: Time.'Time (s)'
+
+relationship 9e3753f4-39ac-4a47-b2a5-287535113465
+	fromColumn: Operation.'Scenario ID'
+	toColumn: Scenario.ID
+
+relationship 1d8cf401-9ece-4dd2-9342-1238f998769f
+	fromColumn: Operation.'Query Duration Key'
+	toColumn: 'Query Duration Segment'.'Query Duration Segment Key'
+
+relationship 1ee4fc68-3481-4550-b51a-48505388bd45
+	fromColumn: 'Suboperation - Refresh'.XmlaRequestId
+	toColumn: Operation.'Refresh Suboperation Key'
+
+relationship f11f20aa-9e17-48b7-8b06-8a70af2d59da
+	fromColumn: 'Suboperation - Query'.XmlaRequestId
+	toColumn: Operation.'Query Suboperation Key'
+
+relationship 333652f5-7c62-44c1-86d3-f211a62d2d09
+	fromColumn: 'Suboperation - Aggregations'.XmlaRequestId
+	toColumn: Operation.'Agg Suboperation Key'
+
+relationship bcbc260d-ac2f-4648-ba0c-d311741b507a
+	fromColumn: Operation.'Executing User'
+	toColumn: User.'Executing User'
+
+relationship e0b3572b-f1c4-42df-be29-392449be7a19
+	fromColumn: Operation.'Start Date'
+	toColumn: Calendar.Date
+

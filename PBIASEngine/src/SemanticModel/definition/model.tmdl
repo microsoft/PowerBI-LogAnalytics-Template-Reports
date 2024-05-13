@@ -1,0 +1,55 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-GB
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup Params
+
+	annotation PBI_QueryGroupOrder = 0
+
+queryGroup 'Helper queries'
+
+	annotation PBI_QueryGroupOrder = 1
+
+queryGroup 'Kusto queries'
+
+	annotation PBI_QueryGroupOrder = 2
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["Operation","Suboperation - Refresh","Suboperation - Query","Report Measures","Time","Days Ago To Start","Days Ago To Finish","Log Analytics Table","fnGetOperationsExceptRefreshes","fnGetRefreshOperations","fnGetQuerySuboperations","fnGetRefreshSuboperations","fnGetRelatedRefreshOperationsForSubOpTable","Log Analytics WorkspaceId","UTC Offset Hours","Pagination Hours","UTCOffsetTable","OperationExceptRefresh_stage","RefreshOperations","RefreshSuboperations","RelatedRefreshOperationsForSubOpTable","Scenario","Query Duration Segment","Object Type","Refresh Duration Segment","StartTime","EndTime","Parent page","Child page","Current page","GetWorkspaceId","Suboperation - Aggregations","fnGetAggSuboperations","Last Refresh"]
+
+annotation PBIDesktopVersion = 2.129.256.0 (24.05)
+
+annotation __TEdtr = 1
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table Calendar
+ref table 'Report Measures'
+ref table Time
+ref table User
+ref table Operation
+ref table 'Suboperation - Refresh'
+ref table Scenario
+ref table 'Query Duration Segment'
+ref table 'Refresh Duration Segment'
+ref table 'Suboperation - Query'
+ref table StartTime
+ref table EndTime
+ref table 'Top N Selector'
+ref table EndDateTable
+ref table StartDateTable
+ref table 'Parent page'
+ref table 'Child page'
+ref table 'Current page'
+ref table GetWorkspaceId
+ref table 'Timeline Visual Columns'
+ref table 'Suboperation - Aggregations'
+ref table 'Last Refresh'
+
+ref cultureInfo en-US
+

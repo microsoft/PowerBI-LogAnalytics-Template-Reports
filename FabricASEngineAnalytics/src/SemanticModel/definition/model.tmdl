@@ -1,0 +1,24 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBIDesktopVersion = 2.129.702.0 (24.05)
+
+annotation PBI_QueryOrder = ["Azure Log Analytics Workspace Id","Days Ago To Start","Days Ago To Finish","UTC Offset Hours","Fabric Workspace Id","Fabric Item Id","ExecutionMetrics","Progress Report","EventText","Calendar","_ArtifactId","_WorkspaceId"]
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table 'Progress Report'
+ref table Calendar
+ref table Artifact
+ref table ExecutionMetrics
+ref table EventText
+
+ref cultureInfo en-US
+

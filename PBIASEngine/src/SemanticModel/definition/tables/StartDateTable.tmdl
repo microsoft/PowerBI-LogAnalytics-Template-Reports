@@ -1,0 +1,146 @@
+table StartDateTable
+	lineageTag: 8613e5c4-af3d-452b-9ba5-6dd55bf60449
+
+	measure 'Filter error details time range' = ```
+			
+			VAR StartFilter =
+			    /*CALCULATE ( MIN ( StartDateTable[Date] ), ALLSELECTED ( StartDateTable ) ) +*/
+			    CALCULATE (
+			        MIN ( 'StartTime'[Time] ),
+			        ALLSELECTED ( StartTime )
+			    )
+			VAR EndFilter =
+			    /*CALCULATE ( MAX ( EndDateTable[Date] ), ALLSELECTED ( EndDateTable ) )+ */
+			    CALCULATE (
+			        MAX ( EndTime[Time] ),
+			        ALLSELECTED ( EndTime )
+			    )
+			VAR Start_cal =
+			    /*CALCULATE(MIN('Calendar'[Date]))+*/
+			    CALCULATE (
+			        MIN ( 'Time'[Time (s)] )
+			    )
+			VAR end_cal =
+			    /*CALCULATE(MAX('Calendar'[Date]))+*/
+			    CALCULATE (
+			        MAX ( 'Time'[Time (s)] )
+			    )
+			RETURN
+			    IF (
+			        Start_cal >= StartFilter
+			            && end_cal <= EndFilter,
+			        1,
+			        2
+			    )
+			
+			```
+		formatString: #,0
+		lineageTag: 8dcd16eb-6592-4a2a-a692-966633ca66a3
+
+	measure 'Text  error details time range' =
+			
+			VAR Start_Range =
+			    CALCULATE (
+			        MIN ( StartTime[Time] ),
+			        ALLSELECTED ( StartTime )
+			    )
+			VAR End_Range =
+			    CALCULATE (
+			        MAX ( EndTime[Time] ),
+			        ALLSELECTED ( EndTime )
+			    )
+			VAR current_date =
+			    SELECTEDVALUE ( 'Calendar'[Date] )
+			RETURN
+			    //"Selected Range: " &
+			    current_date & " " & Start_Range & " - " & End_Range
+		lineageTag: 07a6fee8-15e4-409e-ba32-e586f7a04041
+
+	measure 'Filter error details time range(operation)' =
+			
+			VAR StartFilter =
+			    /*CALCULATE ( MIN ( StartDateTable[Date] ), ALLSELECTED ( StartDateTable ) ) +*/
+			    CALCULATE (
+			        FORMAT (
+			            MIN ( 'StartTime'[Time] ),
+			            "hh:mm:ss"
+			        ),
+			        ALLSELECTED ( StartTime )
+			    )
+			VAR EndFilter =
+			    /*CALCULATE ( MAX ( EndDateTable[Date] ), ALLSELECTED ( EndDateTable ) )+ */
+			    CALCULATE (
+			        FORMAT (
+			            MAX ( EndTime[Time] ),
+			            "hh:mm:ss"
+			        ),
+			        ALLSELECTED ( EndTime )
+			    )
+			VAR Start_cal =
+			    /*CALCULATE(MIN('Calendar'[Date]))+*/
+			    CALCULATE (
+			        MIN ( 'Time'[Time (s)] )
+			    )
+			VAR end_cal =
+			    /*CALCULATE(MAX('Calendar'[Date]))+*/
+			    CALCULATE (
+			        MAX ( 'Time'[Time (s)] )
+			    )
+			RETURN
+			    IF (
+			        CALCULATE (
+			            FORMAT (
+			                MIN ( Operation[Start Time] ),
+			                "hh:mm:ss"
+			            )
+			        ) >= StartFilter
+			            && CALCULATE (
+			                FORMAT (
+			                    MAX ( Operation[End Time] ),
+			                    "hh:mm:ss"
+			                )
+			            ) <= EndFilter,
+			        1,
+			        2
+			    )
+		formatString: #,0
+		lineageTag: 1d4b9aa7-dd2d-42cb-9c9a-31a3c4aa625e
+
+	column Date
+		dataType: dateTime
+		formatString: dd-mmm-yy
+		lineageTag: 975f956c-d6b1-4651-854e-7e5d93a90bc9
+		summarizeBy: none
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: Calendar[Date]
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column UNIXStartDate =
+			
+			StartDateTable[Date]
+		dataType: int64
+		lineageTag: 9376b968-1f6a-48c5-8e48-88b26d52f2d2
+		summarizeBy: sum
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition StartDateTable-c7fec288-3dce-4b8c-b8a9-02b91c5a9d72 = calculated
+		mode: import
+		source = ```
+				
+				DISTINCT ( 'Calendar'[Date] )
+				
+				```
+
+	annotation PBI_Id = 440df2ef9ec44458a9513ef4e9c97385
+
