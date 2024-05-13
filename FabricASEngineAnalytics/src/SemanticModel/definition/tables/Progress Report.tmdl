@@ -247,7 +247,7 @@ table 'Progress Report'
 	measure 'Partition TMID' = SELECTEDVALUE('Progress Report'[PartitionTMID])
 		lineageTag: 731d8be0-9c45-4067-962e-e3acb5957d19
 
-	measure 'Check Row Processed' = [Total Rows] - [Row Processed]
+	measure 'Row Processed Reconcile' = [Total Rows] - [Row Processed]
 		formatString: #,0
 		lineageTag: 6121d029-acc9-4c36-86a4-780fc1e5d7a1
 

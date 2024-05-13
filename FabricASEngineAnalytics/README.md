@@ -25,26 +25,22 @@ The following parameters are defined in the template:
 The model has the following tables and the relationships:
 * Calendar
   * 30s granularity.
-  * Has columns like Date and Hour feed to the "Filters on all pages" section.
+  * Has columns such as Date and Hour fed into the "Filters on all pages" section.
 * Artifact
   * This is a calculated table based on the ExecutionMetrics table.
-  * Has columns like WorkspaceId, WorkspaceName, ArtifactId/Semantic Model Id, ArtifactName/Semantic Model Name feed to the "Filters on all pages" section.
+  * Has columns such as WorkspaceId, WorkspaceName, ArtifactId/Semantic Model Id, ArtifactName/Semantic Model Name fed into the "Filters on all pages" section.
 * ExecutionMetrics
-  * This is a list of all the XmlaRequestId that has ExecutionMetrics and can be associated with a semantic moded. Plus, the XmlaRequesstId can associated with a semantic model but no ExecutionMetrics (on-going refreshes or missing traces).
-  * Has many to one relationshop to the Calendar and Artifiact tables.
-  * Has columns like CapacityId, XmlaRequestId, ApplicationName and EffectiveClaims/Identity feed to the "Filters on all pages" section.
-* Command
-  * This is a list of the XmalRequestId for data refreshes, as well as commands like backup, restore, deployment using the XMLA endpoint.
-  * Has one to one relatinship to the ExecutionMetrics table.
-  * Has columns like OperationDetailName, RequestApp, RequestID, Status, StatusCode, CommandHash feed to the "Filter on this page" of the "Command/Refresh" page.
-* Query
-  * This is a list of the XmalRequestId for user queries.
+  * This is a list of all the XmlaRequestId that has ExecutionMetrics and can be associated with a semantic model. Plus, the XmlaRequesstId can associated with a semantic model but no ExecutionMetrics (on-going refreshes or missing traces).
+  * Has many to one relationship to the Calendar and Artifact tables.
+  * Has columns such as CapacityId, XmlaRequestId, ApplicationName, RequestApp, EffectiveClaims/Identity, Status, StatusCode fed into the "Filters on all pages" section.
+* EventText
+  * This is a list of the XmalRequestId with their EventText and EventTextHash for user queries, refresh commands, and other operations such as backup, restore, or deployment using the XMLA endpoint.
   * Has one to one relationship to the ExecutionMetrics table.
-  * Has columns like OperationDetailName, RequestApp, RequestID, Status, StatusCode, QueryHash, DatasetId, ReportId, VisualId, DurationBucket, DatasetMode, ReplicaId feed to the "Filter on this page" of the "Query" page.
+  * Having this in a separate table allows the ExecutionMetircs table to hit the [Log Analytics Query Limits](#considerations-and-limitations) at a later point.
 * Progress Report
   * Details of the data refresh at the table and partition level.
   * Has many to one relationship to the Command table.
-  * Feeds to the "Command/Refresh" page and the Drill through page: "Refresh details".
+  * Feeds into the "Command/Refresh" page and the Drill through page: "Refresh details".
    ![Screenshot of the model view.](./media/model-view.png)
 
 ### Page: Overview
@@ -71,7 +67,7 @@ The model has the following tables and the relationships:
   * Expand the semantic model table to view the partitions, selecting a partition to cross filter the table above as well as the column chart next to it. In the following example:
     * The selected partition is created by the incremental policy at 1am.
     * Scheduled to refresh every three hours and row processed keeps increasing.
-    * Plus an additional refresh at 1am the following day to ensure partitions that are sliding from the incremental refresh window into the historical window (where they won’t be refreshed anymore) are going through a last refresh that ensures that they are up to date.
+    * Additionally, a refresh at 1am the subsequent day guarantees that partitions transitioning from the incremental refresh window to the historical window (where they will no longer be refreshed) receive a final update that ensures that they are up to date.
     * In total, this partition is refreshed 9 times while the semantic model is refreshed 70 times.
        ![Screenshot of the command page partition.](./media/page-command-partition.png)
 
@@ -82,7 +78,7 @@ The model has the following tables and the relationships:
        ![Screenshot of the refresh details page.](./media/page-refresh-details.png)
 
 * Query
-  * Review the CPU and duration by ReportId, User, Query Type, StatusCode. For a high CPU or duration query/XmlaRequestId, filter by QueryHash to review the performance of the same query over the time.
+  * Review the CPU and duration by ReportId, User, Query Type, StatusCode. For a high CPU or long duration query/XmlaRequestId, filter by EventTextHash to review the performance of the same query over the time.
        ![Screenshot of the query page.](./media/page-query.png)
 
 
@@ -96,4 +92,4 @@ The model has the following tables and the relationships:
 
 * Missing traces
 
-  * It is possible that traces are missing due to transient issue. For example, a XmlaReqeustId might have CommandBegin but no CommandEnd or ExecutionMetrics. As long as there are traces for the following refreshes we can treat it as missing traces, instead of a blocking issue.
+  * Missing traces might result from transient issues. For instance, a XmlaRequestId may have a CommandBegin but lack a CommandEnd or ExecutionMetrics trace. If there are traces of later refreshes, it is likely that the prior trace was simply missing.

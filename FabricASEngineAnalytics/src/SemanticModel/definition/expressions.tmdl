@@ -5,7 +5,7 @@ expression 'Azure Log Analytics Workspace Id' = "bec544b6-e5d2-42b7-a705-40108a4
 	annotation PBI_ResultType = Text
 
 /// The offset in hours from UTC time. You can enter part hours, for example 5.5 for India.
-expression 'UTC Offset Hours' = -5 meta [IsParameterQuery=true, List={-4, -3, -2, -1, 0, 1, 2, 3, 4}, DefaultValue=0, Type="Number", IsParameterQueryRequired=true]
+expression 'UTC Offset Hours' = 0 meta [IsParameterQuery=true, List={-4, -3, -2, -1, 0, 1, 2, 3, 4}, DefaultValue=0, Type="Number", IsParameterQueryRequired=true]
 	lineageTag: b66254e3-404c-4297-965c-5c9c7d8a0114
 
 	annotation PBI_ResultType = Number
@@ -17,10 +17,10 @@ expression 'Fabric Item Id' = null meta [IsParameterQuery=true, Type="Text", IsP
 	annotation PBI_ResultType = Null
 
 /// Optionally enter a fabric workspace Id.
-expression 'Fabric Workspace Id' = "eb63fc9c-8ecd-4c6b-b925-a9c93bd0b81e" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=false]
+expression 'Fabric Workspace Id' = null meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=false]
 	lineageTag: a40798a4-9cf1-4d77-9bd9-7b2b38dea7bb
 
-	annotation PBI_ResultType = Text
+	annotation PBI_ResultType = Null
 
 expression _WorkspaceId = if #"Fabric Workspace Id" is null then "" else #"Fabric Workspace Id"
 	lineageTag: dc9ce87d-b1b4-4911-bba1-b165c3a7d672

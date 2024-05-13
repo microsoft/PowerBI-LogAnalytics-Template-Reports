@@ -2,10 +2,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
     "type": "Report",
-    "displayName": "FabricASEngineAnalytics"
+    "displayName": "FabricASEngineAnalytics2"
   },
   "config": {
     "version": "2.0",
-    "logicalId": "61fb6948-f61c-4eeb-a789-a6216f88d13b"
+    "logicalId": "012e5a7a-e9d2-41d8-9f82-2940a4d9d6fa"
   }
 }
