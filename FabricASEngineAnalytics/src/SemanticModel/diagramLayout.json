@@ -10,50 +10,50 @@
       "nodes": [
         {
           "location": {
-            "x": 10,
-            "y": 149.84441891600704
+            "x": 571.21738886267735,
+            "y": 420.94388843297014
           },
           "nodeIndex": "Progress Report",
           "nodeLineageTag": "601fa947-27b9-4435-83b5-38a0fb1dcd5a",
           "size": {
-            "height": 300,
+            "height": 282.163394557925,
             "width": 234
           },
-          "zIndex": 1
+          "zIndex": 5
         },
         {
           "location": {
-            "x": 894.10132969171718,
-            "y": 668.8467832303669
+            "x": 565.63893557410438,
+            "y": 29.727675736791664
           },
           "nodeIndex": "Calendar",
           "nodeLineageTag": "f6e78640-383c-40d3-bf96-c66fe86b0bc3",
           "size": {
-            "height": 248,
+            "height": 269.40392653048997,
             "width": 234
           },
           "zIndex": 2
         },
         {
           "location": {
-            "x": 621.98940810145064,
-            "y": 314.57068723210187
+            "x": 30.916782766263353,
+            "y": 30.916782766263331
           },
           "nodeIndex": "Artifact",
           "nodeLineageTag": "dd9e522d-6584-41ec-8e2e-d7aff0a6882a",
           "size": {
-            "height": 176,
+            "height": 274.16035464837665,
             "width": 234
           },
-          "zIndex": 6
+          "zIndex": 4
         },
         {
           "location": {
-            "x": 334.93262024291511,
-            "y": -10
+            "x": 294.18085562948835,
+            "y": 216.18597549159358
           },
-          "nodeIndex": "Query",
-          "nodeLineageTag": "7b523ff6-7678-4578-ac93-cb27cc13beb5",
+          "nodeIndex": "ExecutionMetrics",
+          "nodeLineageTag": "388b868c-ddfb-49a5-bcd6-8cc2a18f5aa1",
           "size": {
             "height": 300,
             "width": 234
@@ -62,33 +62,20 @@
         },
         {
           "location": {
-            "x": 10.729008353515212,
-            "y": 500.95142636285743
+            "x": 45.77164058483595,
+            "y": 466.12995555289314
           },
-          "nodeIndex": "Command",
-          "nodeLineageTag": "4d38904d-2fa7-4d91-a6c2-865c8f3a3ef8",
+          "nodeIndex": "EventText",
+          "nodeLineageTag": "339f4188-8b84-4ecb-9882-43867f3a2924",
           "size": {
-            "height": 300,
+            "height": 193.83660544207498,
             "width": 234
           },
-          "zIndex": 4
-        },
-        {
-          "location": {
-            "x": 296.4642443548513,
-            "y": 343.74666392585942
-          },
-          "nodeIndex": "ExecutionMetrics",
-          "nodeLineageTag": "388b868c-ddfb-49a5-bcd6-8cc2a18f5aa1",
-          "size": {
-            "height": 300,
-            "width": 234
-          },
-          "zIndex": 5
+          "zIndex": 1
         }
       ],
       "name": "All tables",
-      "zoomValue": 74.0499959711097,
+      "zoomValue": 84.096719236813442,
       "pinKeyFieldsToTop": false,
       "showExtraHeaderInfo": false,
       "hideKeyFieldsWhenCollapsed": false,

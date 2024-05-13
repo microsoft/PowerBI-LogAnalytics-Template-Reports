@@ -35,7 +35,7 @@ table 'Progress Report'
 
 		changedProperty = FormatString
 
-	measure 'Column Count' = SUMX(VALUES('Progress Report'[TableName]),CALCULATE(MAX('Progress Report'[ObjectCount]),'Progress Report'[OperationDetailName]=="CompressSegment"))
+	measure 'Column Count' = SUMX(VALUES('Progress Report'[TableName]),CALCULATE(MAX('Progress Report'[ObjectCount]),'Progress Report'[OperationDetailName]="CompressSegment"))
 		formatString: #,0
 		lineageTag: 57921194-f2f9-4b48-a6c4-8ba760ba305d
 
@@ -59,7 +59,7 @@ table 'Progress Report'
 
 		changedProperty = FormatString
 
-	measure 'Row Processed' = CALCULATE(SUM('Progress Report'[ObjectCount]), 'Progress Report'[OperationDetailName]="ReadData")
+	measure 'Row Processed' = CALCULATE(SUM('Progress Report'[ObjectCount]), KEEPFILTERS('Progress Report'[OperationDetailName]="ReadData"))
 		formatString: #,0
 		lineageTag: 923f122a-5c74-4a1e-8734-3f8ee5611c67
 
@@ -247,6 +247,10 @@ table 'Progress Report'
 	measure 'Partition TMID' = SELECTEDVALUE('Progress Report'[PartitionTMID])
 		lineageTag: 731d8be0-9c45-4067-962e-e3acb5957d19
 
+	measure 'Row Processed Reconcile' = [Total Rows] - [Row Processed]
+		formatString: #,0
+		lineageTag: 6121d029-acc9-4c36-86a4-780fc1e5d7a1
+
 	column endTime
 		dataType: dateTime
 		formatString: yyyy-mm-dd hh:nn:ss
@@ -263,6 +267,7 @@ table 'Progress Report'
 
 	column XmlaRequestId
 		dataType: string
+		isHidden
 		sourceProviderType: nvarchar(max)
 		lineageTag: 4ba020ef-fefc-4984-81d7-3d7a23571c76
 		summarizeBy: none

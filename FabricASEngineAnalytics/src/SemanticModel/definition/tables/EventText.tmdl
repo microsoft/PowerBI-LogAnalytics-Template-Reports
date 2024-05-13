@@ -1,0 +1,106 @@
+table EventText
+	lineageTag: 339f4188-8b84-4ecb-9882-43867f3a2924
+
+	column XmlaRequestId
+		dataType: string
+		isHidden
+		lineageTag: d767d976-d74c-49fc-bb5e-3c69901f176c
+		summarizeBy: none
+		sourceColumn: XmlaRequestId
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column EventText
+		dataType: string
+		lineageTag: b11511b0-c18e-4675-b7ac-d30f8f80b509
+		summarizeBy: none
+		sourceColumn: EventText
+
+		annotation SummarizationSetBy = Automatic
+
+	column ErrorMessage
+		dataType: string
+		lineageTag: 0cb96b58-fad5-4dda-a332-11f61b64e13b
+		summarizeBy: none
+		sourceColumn: ErrorMessage
+
+		annotation SummarizationSetBy = Automatic
+
+	column EventTextHash
+		dataType: string
+		lineageTag: 24cc0fa8-ff58-40a3-9cdd-807c57cf5696
+		summarizeBy: none
+		sourceColumn: EventTextHash
+
+		annotation SummarizationSetBy = Automatic
+
+	partition EventText = m
+		mode: import
+		source = ```
+				// let RangeStartTime = datetime("& DateTime.ToText(RangeStart, "yyyy-MM-dd HH:mm:ss") &");
+				// let RangeEndTime = datetime("& DateTime.ToText(RangeEnd, "yyyy-MM-dd HH:mm:ss") &");
+				let AnalyticsQuery =
+				let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/" & #"Azure Log Analytics Workspace Id" & "/query", 
+				[Query=[#"query"="
+				set notruncation;
+				set ClientRequestIdPrefix='BYOLA ExecutionMetrics';
+				let FileTimeToDateTime = (fileTime: long) { unixtime_nanoseconds_todatetime((fileTime - 116444736000000000) * 100) };
+				let RangeStartTime = ago(" & Number.ToText(#"Days Ago To Start") & "d);
+				let RangeEndTime = ago(" & Number.ToText(#"Days Ago To Finish") & "d);
+				let dbid = '"& _ArtifactId &"';
+				let wkspid = '"& _WorkspaceId &"';
+				let ConvertIntendedUsage = (enum: int) { case(enum == 0, 'Default', enum == 1, 'Scheduled', enum == 2, 'Interactive', enum == 3, 'Service', 'NA') };
+				let window = PowerBIDatasetsWorkspace
+				| extend TimeGenerated=TimeGenerated+"& Number.ToText(#"UTC Offset Hours") &"h 
+				| where TimeGenerated >=RangeStartTime-7h and TimeGenerated <RangeEndTime+15m 
+				| extend effectiveClaims=coalesce(Identity.effectiveClaims.upn, customData=Identity.effectiveClaims.customData)
+				| extend DatasetId=ApplicationContext.DatasetId, ReportId = ApplicationContext.Sources.[0].ReportId, VisualId = ApplicationContext.Sources.[0].VisualId
+				| parse XmlaProperties with * '<DbpropMsmdRequestID>' RequestID '</DbpropMsmdRequestID>' *
+				| parse kind=regex flags=Ui XmlaProperties with '(.?)[a-zA-Z]*<SspropInitAppName>' RequestApp '<' *
+				;
+				let semanticmodel=materialize(window | where ArtifactId != '' 
+				| summarize arg_max(TimeGenerated, ArtifactId, ArtifactName, PowerBIWorkspaceId, PowerBIWorkspaceName, PremiumCapacityId) by XmlaRequestId
+				| where PowerBIWorkspaceId has wkspid and ArtifactId has dbid)
+				;
+				let Operation = window
+				| where LogAnalyticsCategory in ('Progress Report', 'Command', 'Query') and OperationDetailName !='ExtAuth'
+				| summarize arg_min(timeStart=TimeGenerated, OperationDetailName, RequestApp, EventText), arg_max(timeEnd=TimeGenerated, CorrelationId) by XmlaRequestId
+				| join kind=inner semanticmodel on XmlaRequestId| project-away XmlaRequestId1
+				| where RequestApp !in ('PowerBIEIM', 'Data Loss Prevention Scan') and not(EventText has_any ('<Discover', '<Cancel', '<BeginTransaction', '<RollbackTransaction', '>Trace<')) and OperationDetailName !='CommitTransaction'
+				;
+				Operation
+				| project timeStart, timeEnd, XmlaRequestId, CorrelationId, EventText
+				| where EventText != ''
+				| where timeEnd >= RangeStartTime and timeEnd < RangeEndTime
+				| join kind=leftouter (window | where OperationDetailName == 'Error'
+				    | summarize arg_max(TimeGenerated, ErrorMessage=EventText) by XmlaRequestId, CorrelationId)
+				    on XmlaRequestId, CorrelationId| project-away XmlaRequestId1, CorrelationId, CorrelationId1, TimeGenerated
+				| extend EventTextHash=hash_md5(EventText)| project-away timeStart, timeEnd
+				",#"x-ms-app"="OmsAnalyticsPBI",#"prefer"="ai.response-thinning=true"],Timeout=#duration(0,0,10,0)])),
+				TypeMap = #table(
+				{ "AnalyticsTypes", "Type" }, 
+				{ 
+				{ "string",   Text.Type },
+				{ "int",      Int32.Type },
+				{ "long",     Int64.Type },
+				{ "real",     Double.Type },
+				{ "timespan", Duration.Type },
+				{ "datetime", DateTimeZone.Type },
+				{ "bool",     Logical.Type },
+				{ "guid",     Text.Type },
+				{ "dynamic",  Text.Type }
+				}),
+				DataTable = Source[tables]{0},
+				Columns = Table.FromRecords(DataTable[columns]),
+				ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+				Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+				Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+				in
+				Table
+				in AnalyticsQuery
+				```
+
+	annotation PBI_ResultType = Table
+
