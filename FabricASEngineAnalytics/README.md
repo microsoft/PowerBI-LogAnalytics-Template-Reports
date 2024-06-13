@@ -6,8 +6,7 @@ Download Power BI report template: [here](./FabricASEngineAnalytics.pbit)
 
 The following video shows how to utilize Log Analytics along the report template to better diagnose Fabric Capacity throttling scenarios:
 
-[![Watch the video](./media/demo-01.png)](./media/demo-01.mp4)
-
+https://github.com/microsoft/PowerBI-LogAnalytics-Template-Reports/assets/10808715/93b6d314-0988-4738-9583-28f2226d50ac
 
 ## Setup
 
