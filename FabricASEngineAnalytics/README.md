@@ -4,6 +4,11 @@ This template adds the model layer to the ocean of the Analysis Services engine 
 
 Download Power BI report template: [here](./FabricASEngineAnalytics.pbit)
 
+The following video shows how to utilize Log Analytics along the report template to better diagnose Fabric Capacity throttling scenarios:
+
+[![Watch the video](./media/demo-01.png)](./media/demo-01.mp4)
+
+
 ## Setup
 
 The following parameters are defined in the template:
